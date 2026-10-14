@@ -1,12 +1,12 @@
 ---
 description: Padrão de testes pytest — Postgres real via testcontainers, factories, cliente HTTP async
-globs: tests/**/*.py
+globs: backend/tests/**/*.py
 alwaysApply: false
 ---
 
 # Testes Python
 
-- Rodar com `uv run pytest`. `asyncio_mode = "auto"` no `pyproject.toml`; não decorar cada teste com `@pytest.mark.asyncio`.
+- Rodar com `uv run pytest` a partir de `backend/`. `asyncio_mode = "auto"` no `pyproject.toml`; não decorar cada teste com `@pytest.mark.asyncio`.
 - Banco: Postgres real via `testcontainers` (fixture `session`-scoped em `tests/conftest.py`). Proibido SQLite e mock de `AsyncSession`.
 - Cada teste roda dentro de uma transação revertida no final (fixture `db_session`). Nada de limpar tabela na mão.
 - Dados: factories `polyfactory` em `tests/factories.py`. Não montar dict gigante inline.

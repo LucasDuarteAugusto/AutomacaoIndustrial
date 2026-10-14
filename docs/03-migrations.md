@@ -1,10 +1,12 @@
 # 03 — Migrations (Alembic)
 
-O Alembic é o controle de versão do schema. Cada arquivo em `migrations/versions/` descreve uma mudança com `upgrade()` (aplica) e `downgrade()` (desfaz). O banco guarda na tabela `alembic_version` qual foi a última aplicada.
+O Alembic é o controle de versão do schema. Cada arquivo em `backend/migrations/versions/` descreve uma mudança com `upgrade()` (aplica) e `downgrade()` (desfaz). O banco guarda na tabela `alembic_version` qual foi a última aplicada.
+
+> Todos os comandos deste documento rodam a partir de `backend/`, e os caminhos abaixo são relativos a essa pasta.
 
 ## Arquivos envolvidos
 
-| Arquivo | Papel |
+| Arquivo (em `backend/`) | Papel |
 |---|---|
 | `pyproject.toml` → `[tool.alembic]` | Local das migrations, formato do nome do arquivo (data + hora + slug), hooks que rodam ruff no arquivo gerado |
 | `alembic.ini` | Apenas configuração de logging |

@@ -6,6 +6,7 @@
 |---|---|---|
 | 0 — Fundação | Projeto uv, FastAPI, configuração, logs, erros problem+json, Postgres+pgvector no Docker, Alembic, `/health`, `/ready`, testes com testcontainers | `feat/esqueleto-inicial` |
 | 1 — Catálogo | Tipos de equipamento, fabricantes, famílias, equipamentos e documentos (metadados e vínculos N:N), com CRUD, filtros e paginação | `feat/catalogo` |
+| — Monorepo | Projeto Python movido para `backend/`; `docker-compose.yml`, `docs/` e configurações compartilhadas na raiz; README na raiz | `feat/catalogo` |
 
 ## Próximas fases
 

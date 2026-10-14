@@ -10,6 +10,8 @@ disable-model-invocation: true
 
 # Migration Alembic
 
+Monorepo: rode os comandos `uv run alembic ...` a partir de `backend/`.
+
 ## Requisito mínimo
 
 Exija a **mudança** (criar tabela, adicionar coluna, índice, etc.) e confirme que a tabela é **deste serviço**. Tabela que pertence ao `tdpcloud-backend-node` (Sequelize) não recebe migration aqui: avise e pare.

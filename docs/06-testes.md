@@ -2,6 +2,8 @@
 
 ## Rodando
 
+Comandos e caminhos deste documento são relativos a `backend/`.
+
 ```powershell
 uv run pytest                          # todos (Docker Desktop precisa estar aberto)
 uv run pytest tests/catalogo -q        # um domínio

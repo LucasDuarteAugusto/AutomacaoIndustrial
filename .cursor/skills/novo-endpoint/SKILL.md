@@ -10,6 +10,8 @@ disable-model-invocation: true
 
 # Novo endpoint
 
+Monorepo: caminhos (`app/`, `tests/`, `migrations/`) e comandos `uv run ...` são relativos a `backend/`.
+
 ## Requisito mínimo
 
 Exija antes de gerar código:

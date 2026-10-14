@@ -29,27 +29,36 @@ def verificacoes(raiz: Path) -> list[tuple[str, list[str], int]]:
     return lista
 
 
+def projetos_python(raiz: Path) -> list[Path]:
+    if (raiz / "pyproject.toml").is_file():
+        return [raiz]
+    return sorted(p for p in raiz.iterdir() if p.is_dir() and (p / "pyproject.toml").is_file())
+
+
 def main() -> None:
     entrada = ler_entrada()
     raiz = Path.cwd()
-    if entrada.get("status") != "completed" or not (raiz / "pyproject.toml").is_file():
+    projetos = projetos_python(raiz)
+    if entrada.get("status") != "completed" or not projetos:
         responder()
     if not houve_mudanca_python(raiz):
         responder()
 
     falhas: list[str] = []
-    for nome, cmd, timeout in verificacoes(raiz):
-        try:
-            resultado = rodar(cmd, raiz, timeout)
-        except subprocess.TimeoutExpired:
-            falhas.append(f"### {nome}\nTempo esgotado ({timeout}s).")
-            continue
-        except OSError as erro:
-            falhas.append(f"### {nome}\nNão foi possível executar: {erro}")
-            continue
-        if resultado.returncode not in (0, 5):
-            saida = (resultado.stdout + resultado.stderr).strip().splitlines()
-            falhas.append(f"### {nome}\n" + "\n".join(saida[-LINHAS_POR_FALHA:]))
+    for projeto in projetos:
+        prefixo = "" if projeto == raiz else f"{projeto.name}: "
+        for nome, cmd, timeout in verificacoes(projeto):
+            try:
+                resultado = rodar(cmd, projeto, timeout)
+            except subprocess.TimeoutExpired:
+                falhas.append(f"### {prefixo}{nome}\nTempo esgotado ({timeout}s).")
+                continue
+            except OSError as erro:
+                falhas.append(f"### {prefixo}{nome}\nNão foi possível executar: {erro}")
+                continue
+            if resultado.returncode not in (0, 5):
+                saida = (resultado.stdout + resultado.stderr).strip().splitlines()
+                falhas.append(f"### {prefixo}{nome}\n" + "\n".join(saida[-LINHAS_POR_FALHA:]))
 
     if not falhas:
         responder()

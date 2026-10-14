@@ -1,0 +1,71 @@
+# AutomacaoIndustrial
+
+Plataforma de apoio a profissionais de automação industrial no **comissionamento de acionamentos de motores**: relés de gerenciamento (SIMOCODE), soft starters e inversores de frequência.
+
+O backend organiza a documentação técnica dos fabricantes (fabricantes → famílias → modelos → documentos) e, nas próximas fases, vai indexá-la com **busca semântica (pgvector)** para que um agente de IA responda perguntas de campo com citação das fontes.
+
+![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.143-009688?logo=fastapi&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17%20%2B%20pgvector-4169E1?logo=postgresql&logoColor=white)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.1%20async-D71F00)
+
+## Início rápido
+
+Pré-requisitos: [uv](https://docs.astral.sh/uv/) e Docker Desktop.
+
+```powershell
+# Banco (na raiz)
+Copy-Item .env.example .env
+docker compose up -d --wait
+
+# API (em backend/)
+cd backend
+Copy-Item .env.example .env
+uv sync
+uv run alembic upgrade head
+uv run uvicorn app.main:create_app --factory --reload
+```
+
+Documentação interativa da API: <http://127.0.0.1:8000/docs>
+
+Passo a passo completo e solução de problemas em [Rodando localmente](docs/01-rodando-localmente.md).
+
+## Documentação
+
+| Documento | Conteúdo |
+|---|---|
+| [01 — Rodando localmente](docs/01-rodando-localmente.md) | Pré-requisitos, primeira execução, variáveis de ambiente, comandos do dia a dia e solução de problemas |
+| [02 — Banco de dados](docs/02-banco-de-dados.md) | Diagrama, tabelas, colunas, restrições e convenções de nomes |
+| [03 — Migrations](docs/03-migrations.md) | Como criar, revisar, aplicar e desfazer mudanças no schema com Alembic |
+| [04 — Arquitetura](docs/04-arquitetura.md) | Stack, monorepo, camadas, estrutura de pastas e decisões técnicas |
+| [05 — API](docs/05-api.md) | Rotas, paginação, filtros, formato de erros e exemplos |
+| [06 — Testes](docs/06-testes.md) | Como os testes funcionam, como rodar e como escrever novos |
+| [07 — Domínio de acionamentos](docs/07-dominio-acionamentos.md) | Glossário técnico (SIMOCODE, soft starter, inversor) e como isso vira dado |
+| [08 — Roadmap](docs/08-roadmap.md) | Fases do projeto e próximos passos |
+
+## Estrutura do repositório
+
+```text
+AutomacaoIndustrial/
+├── backend/             API FastAPI (Python 3.14, SQLAlchemy async, Alembic)
+│   ├── app/             código: core/, catalogo/, documentos/, health/
+│   ├── migrations/      versões do schema
+│   └── tests/           testes contra PostgreSQL real (testcontainers)
+├── docs/                documentação
+├── docker-compose.yml   PostgreSQL 17 + pgvector
+└── .cursor/             regras e automações do assistente de IA
+```
+
+O repositório é um monorepo: o frontend (React) e o aplicativo (Android) entrarão como pastas irmãs de `backend/`, consumindo o contrato OpenAPI da API.
+
+## Status
+
+| Fase | Situação |
+|---|---|
+| Fundação (API, banco, migrations, testes) | Concluída |
+| Catálogo de equipamentos e documentos | Concluída |
+| Ingestão de PDFs e busca semântica | Próxima |
+| Dados estruturados (parâmetros e falhas) | Planejada |
+| Agente de IA, autenticação e clientes | Planejada |
+
+Detalhes em [Roadmap](docs/08-roadmap.md).

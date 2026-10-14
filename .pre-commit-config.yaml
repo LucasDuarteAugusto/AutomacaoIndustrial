@@ -19,12 +19,16 @@ repos:
     hooks:
       - id: ruff-check
         args: [--fix]
+        files: ^backend/
       - id: ruff-format
+        files: ^backend/
 
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.13.1
     hooks:
       - id: uv-lock
+        args: [--project, backend]
+        files: ^backend/(pyproject\.toml|uv\.lock)$
 
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.1
@@ -35,8 +39,9 @@ repos:
     hooks:
       - id: mypy
         name: mypy
-        entry: uv run mypy app
+        entry: uv run --directory backend mypy
         language: system
         types: [python]
+        files: ^backend/
         pass_filenames: false
         stages: [pre-push]

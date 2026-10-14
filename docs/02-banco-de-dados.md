@@ -101,7 +101,7 @@ Fabricante → Família/Série → Modelo (Equipamento) → Documento → (fase 
 | Check | `CK_<TABELA>_<NOME>` | `CK_DOCUMENTOS_IDIOMA` |
 
 - Nunca PK/FK numérica (`serial`, `integer`). `INTEGER` só para quantidades e medidas inteiras.
-- Os nomes de constraint são gerados pela `NAMING_CONVENTION` em `app/core/db.py`.
+- Os nomes de constraint são gerados pela `NAMING_CONVENTION` em `backend/app/core/db.py`.
 - No Python os atributos são snake_case e o nome físico é explícito: `nome: Mapped[str] = mapped_column("NOME", ...)`.
 - Toda coluna e tabela tem `comment` (aparece no `\d+` do psql e em ferramentas gráficas).
 

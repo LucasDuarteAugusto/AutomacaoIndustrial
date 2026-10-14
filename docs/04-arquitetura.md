@@ -41,7 +41,25 @@ SQLModel é uma camada fina sobre o próprio SQLAlchemy e limita consultas compl
 
 ## Estrutura de pastas
 
+O repositório é um **monorepo**: cada aplicação fica em sua pasta, autocontida (dependências, testes e comandos próprios), e o que é compartilhado fica na raiz.
+
 ```text
+AutomacaoIndustrial/
+  README.md               página inicial (links para docs/)
+  docs/                   documentação do projeto todo
+  docker-compose.yml      infraestrutura compartilhada (Postgres)
+  .env.example            variáveis do docker-compose
+  .pre-commit-config.yaml hooks de qualidade para todo o repositório
+  .cursor/                regras, hooks e skills do assistente de IA
+  backend/                API FastAPI (projeto Python)
+  frontend/               (futuro) React
+  mobile/                 (futuro) Android
+```
+
+Dentro de `backend/`:
+
+```text
+pyproject.toml, uv.lock, .python-version, alembic.ini, .env.example
 app/
   main.py               create_app(), lifespan, registro de routers e handlers
   models.py             importa todos os models (para o Alembic)
@@ -60,8 +78,9 @@ app/
   documentos/           documentos e vínculos com famílias/equipamentos
 migrations/             Alembic
 tests/                  espelha app/
-docs/                   esta documentação
 ```
+
+Por que o projeto Python inteiro (e não só `app/`) fica em `backend/`: assim o backend é independente. `cd backend` e todos os comandos (`uv sync`, `uv run pytest`, `uv run alembic ...`) funcionam sem depender de arquivos da raiz, e o frontend terá a mesma independência com seu `package.json`.
 
 Cada domínio segue o mesmo molde:
 
