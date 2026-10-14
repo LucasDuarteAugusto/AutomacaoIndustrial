@@ -1,10 +1,12 @@
 from collections.abc import AsyncIterator
+from datetime import datetime
+from typing import Any, ClassVar
 
 from fastapi import Request
-from sqlalchemy import MetaData, text
+from sqlalchemy import DateTime, MetaData, func, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from app.core.config import Settings
 
@@ -16,9 +18,26 @@ NAMING_CONVENTION = {
     "pk": "PK_%(table_name)s",
 }
 
+UUID_PADRAO = text("gen_random_uuid()")
+
 
 class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=NAMING_CONVENTION)
+
+
+class TimestampMixin:
+    __mapper_args__: ClassVar[dict[str, Any]] = {"eager_defaults": True}
+
+    created_at: Mapped[datetime] = mapped_column(
+        "createdAt", DateTime(timezone=True), server_default=func.now(), comment="Data de criação do registro"
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        "updatedAt",
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        comment="Data da última alteração do registro",
+    )
 
 
 def criar_engine(settings: Settings) -> AsyncEngine:

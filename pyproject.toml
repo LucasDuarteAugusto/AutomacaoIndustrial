@@ -47,6 +47,8 @@ python_version = "3.14"
 strict = true
 plugins = ["pydantic.mypy"]
 files = ["app", "tests", "migrations"]
+mypy_path = "."
+explicit_package_bases = true
 
 [[tool.mypy.overrides]]
 module = ["testcontainers.*"]

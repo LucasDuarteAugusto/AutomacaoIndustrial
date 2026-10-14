@@ -4,10 +4,12 @@ from contextlib import asynccontextmanager
 import structlog
 from fastapi import FastAPI
 
+from app.catalogo.router import routers as catalogo_routers
 from app.core.config import Settings, get_settings
 from app.core.db import criar_engine, criar_sessionmaker
 from app.core.handlers import registrar_handlers
 from app.core.logging import configurar_logging
+from app.documentos.router import router as documentos_router
 from app.health.router import router as health_router
 
 log = structlog.get_logger()
@@ -30,4 +32,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app = FastAPI(title=settings.nome_app, version="0.1.0", lifespan=lifespan)
     registrar_handlers(app)
     app.include_router(health_router)
+    for router in (*catalogo_routers, documentos_router):
+        app.include_router(router)
     return app
