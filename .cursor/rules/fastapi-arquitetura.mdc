@@ -1,0 +1,56 @@
+---
+description: Arquitetura FastAPI — camadas por domínio, async, erros, paginação
+globs: app/**/*.py
+alwaysApply: false
+---
+
+# Arquitetura FastAPI
+
+## Estrutura por domínio
+
+```
+app/
+  main.py            # create_app(), lifespan, routers, handlers
+  core/              # config (Settings), db (engine/session), logging, security, errors
+  <dominio>/
+    router.py        # HTTP: valida entrada, chama service, devolve schema
+    schemas.py       # Pydantic: <Entidade>Create, <Entidade>Update, <Entidade>Out
+    service.py       # regra de negócio; sem FastAPI/Request/HTTPException
+    repository.py    # acesso a dados; só SQLAlchemy, sem regra de negócio
+    models.py        # SQLAlchemy Mapped
+```
+
+- Router não acessa `AsyncSession` direto; passa pelo service.
+- Service não importa `fastapi`. Erro de negócio = exceção de `app/core/errors.py` (`NaoEncontrado`, `Conflito`, `RegraNegocio`).
+- Schema de saída nunca é o model SQLAlchemy. Sempre `response_model`/tipo de retorno explícito.
+- Dependências via `Annotated[..., Depends(...)]` com alias em `app/core/deps.py` (`SessionDep`, `UsuarioAtualDep`, `TenantDep`).
+
+## Async
+
+- Rota `async def` não chama nada bloqueante (`requests`, `time.sleep`, I/O de arquivo grande, CPU pesada). Use `httpx.AsyncClient`, `asyncio.sleep`, ou `run_in_threadpool`.
+- Uma `AsyncSession` por request (dependency com `yield`). Commit no service, não no repository.
+- Sem lazy load implícito em async: use `selectinload`/`joinedload` explícito.
+
+## HTTP
+
+- Rotas versionadas: `APIRouter(prefix="/v1/<dominio>", tags=["<dominio>"])`.
+- Erro sempre RFC 9457 (`application/problem+json`): `type`, `title`, `status`, `detail`, `instance`. Handler central converte as exceções de domínio.
+- Listagem paginada: `?limit=&offset=` (limit máx 100) → `{ "items": [...], "total": n }`.
+- `POST` cria → `201`. `DELETE` → `204`. Validação → `422`. Conflito → `409`.
+- Endpoints `/health` (processo vivo) e `/ready` (banco/redis ok) fora do `/v1`.
+- Config só por `Settings` (pydantic-settings). Nunca `os.getenv` espalhado.
+
+```python
+# ❌ BAD
+@router.get("/{id}")
+async def obter(id: UUID, session: AsyncSession = Depends(get_session)):
+    obj = await session.get(Cliente, id)
+    if not obj:
+        raise HTTPException(404)
+    return obj
+
+# ✅ GOOD
+@router.get("/{id}", response_model=ClienteOut)
+async def obter(id: UUID, service: ClienteServiceDep) -> ClienteOut:
+    return await service.obter(id)  # levanta NaoEncontrado → 404 problem+json
+```

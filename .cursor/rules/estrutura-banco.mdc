@@ -1,0 +1,46 @@
+---
+description: Estrutura do banco INPERA — tabelas, colunas, IDs e mapeamento SQLAlchemy/Alembic
+alwaysApply: true
+---
+
+# Estrutura do banco
+
+Fonte: migrations do `tdpcloud-backend-node` (`src/migrations/admin` e `src/migrations/sistema`). PostgreSQL. Sem sintaxe exclusiva de major nova.
+
+## Nomes
+
+- Tabela em MAIÚSCULO: `ACADEMY_CURSOS`, `POST_MODELOS`, `CLIENTESCONTATOS`.
+- Coluna de negócio em MAIÚSCULO: `TITULO`, `STATUS`, `NOME`.
+- Timestamps herdados do Sequelize: `createdAt` e `updatedAt` (camelCase, com aspas).
+- Índice e constraint em MAIÚSCULO: `IDX_...`, `UK_...`, `FK_...`, `CK_...`.
+- Não misturar snake_case minúsculo em tabela nova.
+
+## Identificadores
+
+- PK é UUID, default `gen_random_uuid()`. Nome `ID` ou `ID_<ENTIDADE>`.
+- FK: `ID_<ENTIDADE>` ou `<ENTIDADE>_ID`, também UUID.
+- Não criar PK nem FK numérica (`INTEGER`, `BIGINT`, `IDENTITY`, serial).
+- `INTEGER` só para quantidade, ordem, duração ou percentual.
+- Tenant: coluna com prefixo da tabela/entidade (`CC_IDCLIENTE` em `CLIENTESCONTATOS`). ADMIN recente: PK com sufixo da entidade (`ID_MODELO`) e demais colunas sem prefixo curto.
+
+## SQLAlchemy
+
+Atributo Python em snake_case; nome físico explícito no `mapped_column`. O SQLAlchemy põe aspas sozinho em nome maiúsculo — nunca concatene SQL com o nome.
+
+```python
+class Modelo(Base):
+    __tablename__ = "POST_MODELOS"
+
+    id_modelo: Mapped[UUID] = mapped_column("ID_MODELO", primary_key=True, server_default=text("gen_random_uuid()"))
+    nome: Mapped[str] = mapped_column("NOME", String(200), comment="Nome do modelo")
+    ativo: Mapped[bool] = mapped_column("ATIVO", server_default=true())
+    created_at: Mapped[datetime] = mapped_column("createdAt", DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column("updatedAt", DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+```
+
+`MetaData(naming_convention=...)` em `app/core/db.py` gera `IDX_%(table_name)s_%(column_0_name)s`, `UK_...`, `FK_...`, `CK_...`.
+
+## Migrations
+
+- Dono do schema compartilhado é o Sequelize do `tdpcloud-backend-node`. Alembic só cria/altera tabelas **deste serviço**; tabela existente de outro sistema é mapeada, não migrada (`include_object` no `env.py` filtra).
+- Cada migration: `upgrade` com guard de existência quando criar tabela, `comment` nos campos, e `downgrade` que remove só o que a migration criou.

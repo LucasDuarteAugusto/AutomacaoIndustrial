@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "uv run --no-project --quiet --python 3.14 .cursor/hooks/guarda-shell.py",
+        "timeout": 15
+      }
+    ],
+    "beforeReadFile": [
+      {
+        "command": "uv run --no-project --quiet --python 3.14 .cursor/hooks/bloqueia-segredos.py",
+        "timeout": 10
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "uv run --no-project --quiet --python 3.14 .cursor/hooks/formatar-python.py",
+        "timeout": 120
+      }
+    ],
+    "stop": [
+      {
+        "command": "uv run --no-project --quiet --python 3.14 .cursor/hooks/verificar-python.py",
+        "timeout": 900,
+        "loop_limit": 3
+      }
+    ]
+  }
+}

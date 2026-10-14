@@ -1,0 +1,64 @@
+---
+description: Pin de stack/versões do backend Python. Gerar código só na API instalada/manifestada aqui — nunca na "versão atual" de docs ou treino.
+alwaysApply: true
+---
+
+# Stack e versões (pin de runtime)
+
+Fonte da verdade, nesta ordem:
+
+1. `uv.lock` (versão resolvida).
+2. `pyproject.toml` (`requires-python`, `[project.dependencies]`, `[dependency-groups]`).
+3. `.python-version`.
+
+Se o repo ainda não tiver `pyproject.toml`, use a tabela abaixo como alvo.
+
+## Gerenciamento
+
+- Dependência só via `uv add <pkg>` / `uv add --dev <pkg>`. Nunca `pip install`, `uv pip install`, `requirements.txt` ou `poetry`.
+- Rodar tudo via `uv run` (`uv run pytest`, `uv run alembic ...`). Não ativar venv manualmente em instruções.
+- Não subir major de lib "de passagem". Precisou de API de major nova: explique o bloqueio e peça autorização.
+
+## Alvo
+
+| Peça | Versão | Proibido (treino antigo) |
+|------|--------|--------------------------|
+| Python | **3.14** | Não usar 3.15. `from __future__ import annotations` desnecessário; `typing.Optional`/`List`/`Dict` → `X \| None`, `list`, `dict`. |
+| FastAPI | `~=0.143` | `@app.on_event("startup")` → usar `lifespan`. Sem `Depends` de classe com estado global. |
+| Pydantic | `~=2.14` | v1: `class Config`, `orm_mode`, `.dict()`, `.json()`, `.parse_obj()`, `@validator`, `@root_validator`. Usar `model_config = ConfigDict(...)`, `model_dump()`, `model_validate()`, `@field_validator`, `@model_validator`. |
+| pydantic-settings | `~=2.16` | `BaseSettings` de `pydantic` (v1). Importar de `pydantic_settings`. |
+| SQLAlchemy | `~=2.1` (async) | `session.query(...)`, `declarative_base()` de `ext.declarative`, `Column` sem `Mapped`. Usar `select()`, `DeclarativeBase`, `Mapped[...]`, `mapped_column()`. |
+| Alembic | `~=1.20` | — |
+| Driver | `asyncpg ~=0.32` | `psycopg2`. |
+| HTTP client | `httpx ~=0.28` (`AsyncClient`) | `requests` em código async. |
+| Auth | `pyjwt ~=2.15`, `pwdlib[argon2] ~=0.3` | `passlib`, `python-jose`. |
+| Servidor | `uvicorn ~=0.54` | — |
+| Logs | `structlog ~=26.1` | `print`, `logging.basicConfig` espalhado. |
+| Lint/format | `ruff ~=0.17` | `black`, `isort`, `flake8`. |
+| Tipos | `mypy ~=2.4` (strict) | — |
+| Testes | `pytest ~=9.1`, `pytest-asyncio ~=1.4`, `testcontainers ~=4.15`, `polyfactory ~=3.3` | SQLite no lugar de Postgres. |
+
+Banco: PostgreSQL (compatível 16–18). Sem sintaxe exclusiva de major nova.
+
+## Exemplos
+
+```python
+# ❌ BAD — Pydantic v1 / SQLAlchemy 1.x / FastAPI antigo
+class Cliente(BaseModel):
+    class Config:
+        orm_mode = True
+
+@app.on_event("startup")
+async def startup(): ...
+
+clientes = session.query(Cliente).filter_by(ATIVO=True).all()
+
+# ✅ GOOD
+class ClienteOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI): ...
+
+clientes = (await session.scalars(select(Cliente).where(Cliente.ativo.is_(True)))).all()
+```

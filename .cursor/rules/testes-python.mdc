@@ -1,0 +1,30 @@
+---
+description: Padrão de testes pytest — Postgres real via testcontainers, factories, cliente HTTP async
+globs: tests/**/*.py
+alwaysApply: false
+---
+
+# Testes Python
+
+- Rodar com `uv run pytest`. `asyncio_mode = "auto"` no `pyproject.toml`; não decorar cada teste com `@pytest.mark.asyncio`.
+- Banco: Postgres real via `testcontainers` (fixture `session`-scoped em `tests/conftest.py`). Proibido SQLite e mock de `AsyncSession`.
+- Cada teste roda dentro de uma transação revertida no final (fixture `db_session`). Nada de limpar tabela na mão.
+- Dados: factories `polyfactory` em `tests/factories.py`. Não montar dict gigante inline.
+- HTTP: `httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://test")`. Override de dependência via `app.dependency_overrides`, limpo no teardown.
+- Mock só em fronteira externa (HTTP de terceiros: `respx`; relógio; fila). Nunca mockar o próprio service/repository no teste de rota.
+- Estrutura espelha `app/`: `tests/<dominio>/test_router.py`, `test_service.py`.
+- Nome descreve o comportamento: `test_criar_cliente_com_cnpj_duplicado_retorna_409`.
+- Todo endpoint novo: caminho feliz, 404/409/422 relevantes e checagem de tenant (não enxerga dado de outro tenant).
+
+```python
+# ❌ BAD
+async def test_cliente(mocker):
+    mocker.patch("app.clientes.repository.ClienteRepository.obter", return_value=None)
+    ...
+
+# ✅ GOOD
+async def test_obter_cliente_inexistente_retorna_404(client: AsyncClient) -> None:
+    resp = await client.get(f"/v1/clientes/{uuid4()}")
+    assert resp.status_code == 404
+    assert resp.headers["content-type"] == "application/problem+json"
+```

@@ -1,0 +1,38 @@
+---
+alwaysApply: true
+---
+# Protected branches — no direct edits
+
+`development` and `master` are shared integration branches. **Never** edit, create, delete, or rename **source code** of the system while HEAD is on either of them. **Never** commit or push **código de produto** to them.
+
+Documentação operacional (NTs, passo a passo, taskcards, etc.) **pode** ser criada/alterada mesmo em branch protegida — ver exceção abaixo.
+
+## Before any code change
+
+1. Run `git branch --show-current` (or `git status -sb`).
+2. If the current branch is `development` or `master` (also treat `main` the same as `master` if it appears):
+   - **Stop.** Do not use Write, StrReplace, EditNotebook, Delete, or any shell command that modifies tracked/untracked **source files**.
+   - Tell the user they are on a protected branch and ask them to switch to (or create) a feature/fix branch before continuing.
+   - Suggest a branch name when helpful, e.g. `feat/...`, `fix/...`, `upgrade/...`, but **do not** create or checkout a branch unless the user explicitly agrees.
+3. If HEAD is already a **non-protected** branch (`feat/…`, `fix/…`, `adjust/…`, etc.):
+   - **Implement on that branch.** Do not create a worktree, a second feature branch, or `git checkout -b` unless the user asks.
+   - Taskcards that suggest a new branch name do **not** override this: the current non-protected branch wins.
+4. Only after HEAD is on a non-protected branch may you proceed with **código de produto**.
+
+## Allowed on protected branches
+
+- Read-only exploration (Read, Grep, Glob, graphify query/path/explain).
+- Answering questions without modifying the working tree.
+- **Documentação / artefatos de processo** que **não** alteram fontes do sistema (NTs, passo a passo, taskcards, conteúdo sob `.cursor/`, markdown/HTML de documentação interna).
+
+  Nesses casos: **não** criar branch `docs/...` só por causa da proteção. Continua **proibido** commit/push em `development` / `master` / `main` salvo pedido explícito do usuário.
+
+## Not allowed on protected branches
+
+- Implementing features, fixes, refactors, or formatting.
+- Staging, committing, merging into, or pushing to `development` / `master` / `main`.
+- "Quick one-line fixes" no código — no exceptions.
+
+O hook `.cursor/hooks/guarda-shell.py` bloqueia `git push` para essas branches.
+
+This applies to you and to every subagent. Include this constraint in subagent prompts that may edit code.

@@ -1,0 +1,78 @@
+[project]
+name = "automacao-industrial"
+version = "0.1.0"
+description = "AutomacaoIndustrial: backend de apoio ao comissionamento de acionamentos de motores (Simocode, soft starters, inversores) com busca semântica."
+authors = [
+    { name = "Lucas Duarte Augusto", email = "lucastestetdp@gmail.com" }
+]
+requires-python = ">=3.14,<3.15"
+dependencies = [
+    "alembic~=1.20",
+    "asyncpg~=0.32",
+    "fastapi~=0.143",
+    "pydantic~=2.14",
+    "pydantic-settings~=2.16",
+    "sqlalchemy[asyncio]~=2.1",
+    "structlog~=26.1",
+    "uvicorn[standard]~=0.54",
+]
+
+[dependency-groups]
+dev = [
+    "httpx~=0.28",
+    "mypy~=2.4",
+    "polyfactory~=3.3",
+    "pytest~=9.1",
+    "pytest-asyncio~=1.4",
+    "ruff~=0.17",
+    "testcontainers[postgres]~=4.15",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+extend-exclude = [".cursor"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "ASYNC", "RUF", "S", "T20"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["app", "tests", "migrations"]
+
+[[tool.mypy.overrides]]
+module = ["testcontainers.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra --strict-markers --import-mode=importlib"
+
+[tool.alembic]
+script_location = "%(here)s/migrations"
+file_template = "%%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s"
+prepend_sys_path = ["."]
+
+[[tool.alembic.post_write_hooks]]
+name = "ruff_check"
+type = "module"
+module = "ruff"
+options = "check --fix REVISION_SCRIPT_FILENAME"
+
+[[tool.alembic.post_write_hooks]]
+name = "ruff_format"
+type = "module"
+module = "ruff"
+options = "format REVISION_SCRIPT_FILENAME"
