@@ -69,6 +69,18 @@ erDiagram
         uuid ID_DOCUMENTO FK
         uuid ID_EQUIPAMENTO FK
     }
+    DOCUMENTOS ||--o{ TRECHOS : "é dividido em"
+    TRECHOS {
+        uuid ID_TRECHO PK
+        uuid ID_DOCUMENTO FK
+        integer ORDEM
+        text CONTEUDO
+        text SECAO
+        integer PAGINA
+        varchar TIPO_CONTEUDO
+        vector EMBEDDING
+        tsvector CONTEUDO_BUSCA
+    }
 ```
 
 Todas as tabelas também têm `createdAt` e `updatedAt` (omitidos no diagrama).
@@ -208,7 +220,7 @@ O `UNIQUE (ID_DOCUMENTO, X)` já serve de índice para buscas por documento; o �
 
 | Extensão | Migration | Uso |
 |---|---|---|
-| `vector` (pgvector) | `habilita_extensao_vector` | Tipo `vector(N)` e operadores de distância (`<=>` cosseno, `<->` euclidiana, `<#>` produto interno). Será usada na tabela `TRECHOS` (fase 2) |
+| `vector` (pgvector) | `habilita_extensao_vector` | Tipo `vector(N)` e operadores de distância (`<=>` cosseno, `<->` euclidiana, `<#>` produto interno). Usada em `TRECHOS.EMBEDDING` |
 
 `gen_random_uuid()` é nativa do PostgreSQL 13+ (não precisa de extensão).
 
@@ -232,12 +244,27 @@ ORDER BY fb."NOME", f."NOME", d."TITULO";
 
 Como os nomes são maiúsculos, no SQL puro eles **precisam de aspas duplas** (`"FAMILIAS"`). Sem aspas, o PostgreSQL converte para minúsculo e não encontra a tabela. No código Python o SQLAlchemy coloca as aspas sozinho.
 
+## Tabela `TRECHOS`
+
+Pedaços indexáveis de um documento (fase 2). Migration `cria_trechos`.
+
+| Coluna | Tipo | Notas |
+|---|---|---|
+| `ID_TRECHO` | UUID PK | `gen_random_uuid()` |
+| `ID_DOCUMENTO` | UUID FK | `ON DELETE CASCADE` |
+| `ORDEM` | INTEGER | Único por documento (`UK_TRECHOS_ID_DOCUMENTO_ORDEM`) |
+| `CONTEUDO` | TEXT | Texto do trecho |
+| `SECAO` | TEXT | Seção/caminho no manual |
+| `PAGINA` | INTEGER | Página de origem |
+| `TIPO_CONTEUDO` | VARCHAR + CHECK | `TEXTO`, `TABELA`, `LISTA`, `LEGENDA_FIGURA`, `CODIGO` |
+| `EMBEDDING` | `vector(1024)` | Voyage `voyage-context-4`; índice HNSW (`vector_cosine_ops`) |
+| `CONTEUDO_BUSCA` | `tsvector` | Busca textual; índice GIN |
+
+A dimensão do vetor está fixada em **1024** (abaixo do limite de 2.000 do HNSW no tipo `vector`). Trocar o modelo ou a dimensão exige reprocessar os trechos. Decisão e alternativas: [09 — Estudo de modelos de IA](09-estudo-modelos-ia.md).
+
 ## Próximas tabelas (planejadas)
 
 | Tabela | Fase | Conteúdo |
 |---|---|---|
-| `TRECHOS` | 2 | Pedaços do documento: `CONTEUDO`, `SECAO`, `PAGINA`, `TIPO_CONTEUDO`, `EMBEDDING vector(N)` com índice HNSW e coluna `tsvector` para busca textual |
 | `PARAMETROS` | 3 | Parâmetros estruturados por família/firmware (código, descrição, unidade, faixa, padrão) |
 | `FALHAS` | 3 | Códigos de falha/alarme com causa e solução |
-
-A dimensão `N` do vetor depende do modelo de embedding escolhido (ex.: 1024 para bge-m3, 1536 para OpenAI text-embedding-3-small) e trocá-la exige reprocessar todos os trechos.

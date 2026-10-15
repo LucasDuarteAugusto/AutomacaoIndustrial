@@ -12,17 +12,16 @@
 
 ### 2 — Ingestão e busca semântica
 
-- [ ] **Decidir o modelo de embedding** (define `vector(N)`):
-
-  | Opção | Dimensão | Custo | Observação |
-  |---|---|---|---|
-  | Ollama + bge-m3 (local) | 1024 | Gratuito; precisa de CPU/GPU razoável | Multilíngue, bom em PT e EN |
-  | OpenAI text-embedding-3-small | 1536 | Pago por uso | Sem infraestrutura local |
-
+- [x] **Estudo e decisão inicial de modelos**: ver [09 — Estudo de modelos de IA](09-estudo-modelos-ia.md).
+  - Embedding: Voyage `voyage-context-4` → `vector(1024)` (200M tokens grátis).
+  - LLM (fase 4): GPT-5 mini; modelos mais fortes sob demanda.
+  - Reserva: Perplexity (texto) ou Gemini Embedding 2 (multimodal), se o teste com manuais reais pedir.
+- [x] Núcleo IA + `TRECHOS` (branch `feat/ingestao-busca`): Settings (Voyage/OpenAI), `ProvedorEmbedding` / `ProvedorLLM`, tabela `TRECHOS` com `vector(1024)`, HNSW e `tsvector`.
+- [ ] Validar recall@5 com 30 a 50 perguntas reais sobre 2 ou 3 manuais (antes de fechar o modelo em produção).
+- [ ] Descrição de figuras (diagramas, telas de IHM) por LLM com visão, indexada como trecho de texto.
 - [ ] Armazenamento de arquivos (pasta local, interface pronta para MinIO/S3).
 - [ ] `POST /v1/documentos/{id}/arquivo`: upload do PDF, cálculo de `HASH_SHA256`, `CHAVE_ARQUIVO`, `TAMANHO_BYTES`.
 - [ ] Processamento em segundo plano: extração de texto e tabelas, divisão em trechos por seção e tipo de conteúdo, geração de embeddings, atualização de `STATUS_PROCESSAMENTO`.
-- [ ] Tabela `TRECHOS` com `EMBEDDING vector(N)`, índice HNSW e `tsvector` por idioma.
 - [ ] `POST /v1/busca`: busca híbrida (vetorial + textual) com filtros por fabricante, família, modelo, tipo de documento, idioma e firmware.
 
 ### 3 — Dados estruturados

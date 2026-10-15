@@ -42,6 +42,7 @@ Passo a passo completo e solução de problemas em [Rodando localmente](docs/01-
 | [06 — Testes](docs/06-testes.md) | Como os testes funcionam, como rodar e como escrever novos |
 | [07 — Domínio de acionamentos](docs/07-dominio-acionamentos.md) | Glossário técnico (SIMOCODE, soft starter, inversor) e como isso vira dado |
 | [08 — Roadmap](docs/08-roadmap.md) | Fases do projeto e próximos passos |
+| [09 — Estudo de modelos de IA](docs/09-estudo-modelos-ia.md) | Custo-benefício de modelos de embedding e LLM para a busca semântica e o agente |
 
 ## Estrutura do repositório
 

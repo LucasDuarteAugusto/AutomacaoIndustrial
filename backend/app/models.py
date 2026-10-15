@@ -3,6 +3,7 @@
 from app.catalogo.models import Equipamento, Fabricante, Familia, TipoEquipamento
 from app.core.db import Base
 from app.documentos.models import Documento, DocumentoEquipamento, DocumentoFamilia
+from app.trechos.models import Trecho
 
 __all__ = [
     "Base",
@@ -13,4 +14,5 @@ __all__ = [
     "Fabricante",
     "Familia",
     "TipoEquipamento",
+    "Trecho",
 ]
