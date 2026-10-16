@@ -51,6 +51,7 @@ Passo a passo completo e solução de problemas em [Rodando localmente](docs/01-
 | [15 — Parâmetros e falhas](docs/15-parametros-falhas.md) | Tabelas estruturadas + lookup no agente |
 | [16 — Docker e CI](docs/16-docker-ci.md) | Imagem da API, Compose e GitHub Actions |
 | [17 — Deploy](docs/17-deploy.md) | Compose prod, secrets, GHCR |
+| [18 — Rate limit](docs/18-rate-limit.md) | Limites por IP (memória; Redis depois) |
 
 ## Estrutura do repositório
 

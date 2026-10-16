@@ -15,6 +15,7 @@ from app.core.config import Settings, get_settings
 from app.core.db import criar_engine, criar_sessionmaker
 from app.core.handlers import registrar_handlers
 from app.core.logging import configurar_logging
+from app.core.rate_limit import RateLimitMiddleware, criar_limitador
 from app.documentos.router import router as documentos_router
 from app.falhas.router import router as falhas_router
 from app.health.router import router as health_router
@@ -45,6 +46,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 app.state.provedor_embedding = criar_provedor_embedding(settings, cliente_http)
                 app.state.provedor_llm = criar_provedor_llm(settings, cliente_http)
             app.state.armazenamento = criar_armazenamento(settings)
+            app.state.limitador = criar_limitador(settings)
             log.info(
                 "app_iniciada",
                 ambiente=settings.ambiente,
@@ -52,6 +54,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 embedding_dimensao=settings.embedding_dimensao,
                 llm_modelo="fake-llm" if settings.ambiente == "teste" else settings.llm_modelo,
                 armazenamento_tipo=settings.armazenamento_tipo,
+                rate_limit_habilitado=settings.rate_limit_habilitado,
+                rate_limit_backend=settings.rate_limit_backend,
             )
             yield
         await engine.dispose()
@@ -64,6 +68,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+    )
+    # Rate limit por IP (memória; Redis na etapa de escala). Desligado em ambiente=teste via Settings.
+    app.add_middleware(
+        RateLimitMiddleware,
+        settings=settings,
+        limitador=criar_limitador(settings),
     )
     registrar_handlers(app)
     app.include_router(health_router)

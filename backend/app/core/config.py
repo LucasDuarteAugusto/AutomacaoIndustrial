@@ -20,6 +20,7 @@ _CAMPOS_VAZIOS_COMO_NONE = frozenset(
         "s3_bucket",
         "s3_access_key_id",
         "s3_secret_access_key",
+        "redis_url",
     }
 )
 
@@ -65,6 +66,14 @@ class Settings(BaseSettings):
     jwt_expiracao_minutos: int = Field(default=480, ge=5, le=60 * 24 * 30)
     # Lista separada por vírgula; use * para refletir qualquer origem (só em local)
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
+
+    rate_limit_habilitado: bool = True
+    rate_limit_backend: Literal["memoria", "redis"] = "memoria"
+    rate_limit_auth_por_minuto: int = Field(default=20, ge=1, le=10_000)
+    rate_limit_busca_por_minuto: int = Field(default=60, ge=1, le=10_000)
+    rate_limit_agente_por_minuto: int = Field(default=20, ge=1, le=10_000)
+    rate_limit_padrao_por_minuto: int = Field(default=120, ge=1, le=10_000)
+    redis_url: str | None = None
 
     @property
     def cors_origins_lista(self) -> list[str]:

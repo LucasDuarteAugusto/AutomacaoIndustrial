@@ -33,6 +33,15 @@ class RegraNegocio(ErroDominio):
     titulo = "Regra de negócio violada"
 
 
+class LimiteExcedido(ErroDominio):
+    status = 429
+    titulo = "Limite de requisições excedido"
+
+    def __init__(self, detalhe: str, *, retry_after: int = 60) -> None:
+        super().__init__(detalhe)
+        self.retry_after = retry_after
+
+
 class ServicoIndisponivel(ErroDominio):
     status = 503
     titulo = "Serviço indisponível"

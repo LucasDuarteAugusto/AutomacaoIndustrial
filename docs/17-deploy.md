@@ -92,4 +92,4 @@ Permissão necessária: **Settings → Actions → Workflow permissions → Read
 
 ## Próximo passo
 
-**Rate limiting** na API (por IP e/ou por usuário JWT) para proteger login, busca e agente sob pico de uso.
+Rate limiting: [18 — Rate limit](18-rate-limit.md). Depois réplicas + LB e Redis.

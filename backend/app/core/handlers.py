@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.core.errors import ErroDominio
+from app.core.errors import ErroDominio, LimiteExcedido
 
 PROBLEM_JSON = "application/problem+json"
 
@@ -37,7 +37,10 @@ def problema(
 
 async def _erro_dominio(request: Request, exc: Exception) -> JSONResponse:
     erro = cast(ErroDominio, exc)
-    return problema(request, erro.status, erro.titulo, erro.detalhe, erro.tipo)
+    resposta = problema(request, erro.status, erro.titulo, erro.detalhe, erro.tipo)
+    if isinstance(erro, LimiteExcedido):
+        resposta.headers["Retry-After"] = str(erro.retry_after)
+    return resposta
 
 
 async def _erro_validacao(request: Request, exc: Exception) -> JSONResponse:

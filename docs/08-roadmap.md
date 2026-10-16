@@ -42,5 +42,6 @@
 - [x] CORS para o frontend React.
 - [x] `Dockerfile` da API e pipeline de CI (`feat/docker-ci`); ver [16 — Docker e CI](16-docker-ci.md).
 - [x] Deploy estável (`feat/deploy`): compose prod, secrets, push GHCR; ver [17 — Deploy](17-deploy.md).
-- [ ] Rate limiting (proteção sob pico; antes de N réplicas / Redis).
+- [x] Rate limiting por IP (`feat/deploy`); ver [18 — Rate limit](18-rate-limit.md).
+- [ ] Réplicas + load balancer; Redis para limite compartilhado.
 - [ ] Frontend React e aplicativo Android consumindo o OpenAPI.

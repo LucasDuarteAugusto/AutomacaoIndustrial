@@ -37,6 +37,7 @@ def settings(database_url: str, tmp_path_factory: pytest.TempPathFactory) -> Set
         ambiente="teste",
         armazenamento_tipo="local",
         armazenamento_caminho=str(pasta_arquivos),
+        rate_limit_habilitado=False,
     )
 
 
