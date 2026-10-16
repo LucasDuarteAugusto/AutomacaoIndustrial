@@ -43,5 +43,6 @@
 - [x] `Dockerfile` da API e pipeline de CI (`feat/docker-ci`); ver [16 — Docker e CI](16-docker-ci.md).
 - [x] Deploy estável (`feat/deploy`): compose prod, secrets, push GHCR; ver [17 — Deploy](17-deploy.md).
 - [x] Rate limiting por IP (`feat/deploy`); ver [18 — Rate limit](18-rate-limit.md).
-- [ ] Réplicas + load balancer; Redis para limite compartilhado.
+- [x] Réplicas + load balancer nginx (`feat/deploy`); ver [19 — Escala](19-escala.md).
+- [ ] Redis para rate limit compartilhado entre réplicas.
 - [ ] Frontend React e aplicativo Android consumindo o OpenAPI.

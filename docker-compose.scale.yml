@@ -1,0 +1,33 @@
+# Escala horizontal: N réplicas da API atrás do nginx (load balancer).
+# Uso:
+#   docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d --build --scale api=3
+#
+# A porta ${API_PORT:-8000} passa a ser do proxy. O rate limit em memória
+# fica por réplica — use Redis (compose redis) para compartilhar contadores.
+
+name: automacao-industrial
+
+services:
+  api:
+    # Várias réplicas não podem ter container_name fixo.
+    container_name: !reset null
+    # Tráfego externo só pelo proxy.
+    ports: !reset []
+
+  proxy:
+    image: nginx:1.27-alpine
+    container_name: automacao-industrial-proxy
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${API_PORT:-8000}:80"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/nginx.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s

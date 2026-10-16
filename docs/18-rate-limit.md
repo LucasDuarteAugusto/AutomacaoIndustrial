@@ -24,4 +24,4 @@ Backend atual: **`memoria`** (por processo). Com várias réplicas o contador n�
 
 ## Próximo passo
 
-Réplicas da API atrás de um load balancer; depois Redis para limites compartilhados.
+Escala: [19 — Réplicas e LB](19-escala.md). Redis para contadores compartilhados entre réplicas.
