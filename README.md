@@ -2,7 +2,7 @@
 
 Plataforma de apoio a profissionais de automação industrial no **comissionamento de acionamentos de motores**: relés de gerenciamento (SIMOCODE), soft starters e inversores de frequência.
 
-O backend organiza a documentação técnica dos fabricantes (fabricantes → famílias → modelos → documentos) e, nas próximas fases, vai indexá-la com **busca semântica (pgvector)** para que um agente de IA responda perguntas de campo com citação das fontes.
+O backend organiza a documentação técnica dos fabricantes (fabricantes → famílias → modelos → documentos), indexa PDFs com **busca semântica (pgvector)** e expõe um **agente Q&A** com citação de fontes, autenticação JWT e dados estruturados de parâmetros/falhas.
 
 ![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.143-009688?logo=fastapi&logoColor=white)
@@ -14,9 +14,9 @@ O backend organiza a documentação técnica dos fabricantes (fabricantes → fa
 Pré-requisitos: [uv](https://docs.astral.sh/uv/) e Docker Desktop.
 
 ```powershell
-# Banco (na raiz)
+# Banco apenas (na raiz) — a API sobe com uv para hot reload
 Copy-Item .env.example .env
-docker compose up -d --wait
+docker compose up -d db --wait
 
 # API (em backend/)
 cd backend
@@ -28,12 +28,14 @@ uv run uvicorn app.main:create_app --factory --reload
 
 Documentação interativa da API: <http://127.0.0.1:8000/docs>
 
-Passo a passo completo e solução de problemas em [Rodando localmente](docs/01-rodando-localmente.md).
+**Testar em casa (roteiro completo):** [00 — Guia de teste manual](docs/00-guia-teste-manual.md).  
+Passo a passo e troubleshooting: [01 — Rodando localmente](docs/01-rodando-localmente.md).
 
 ## Documentação
 
 | Documento | Conteúdo |
 |---|---|
+| [00 — Guia de teste manual](docs/00-guia-teste-manual.md) | Roteiro ponta a ponta para validar o backend em casa (Swagger) |
 | [01 — Rodando localmente](docs/01-rodando-localmente.md) | Pré-requisitos, primeira execução, variáveis de ambiente, comandos do dia a dia e solução de problemas |
 | [02 — Banco de dados](docs/02-banco-de-dados.md) | Diagrama, tabelas, colunas, restrições e convenções de nomes |
 | [03 — Migrations](docs/03-migrations.md) | Como criar, revisar, aplicar e desfazer mudanças no schema com Alembic |

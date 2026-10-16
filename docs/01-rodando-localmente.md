@@ -35,13 +35,16 @@ Regra prática: **`docker compose` na raiz, `uv run` dentro de `backend/`.** Det
 git clone https://github.com/LucasDuarteAugusto/AutomacaoIndustrial.git
 cd AutomacaoIndustrial
 
-# 1. Configuração do banco (raiz) e sobe o PostgreSQL 17 com pgvector
+# 1. Configuração do banco (raiz) — só o Postgres
+#    (não use "docker compose up" sem "db": isso também sobe a API na 8000
+#     e conflita com o uvicorn local abaixo)
 Copy-Item .env.example .env
-docker compose up -d --wait
+docker compose up -d db --wait
 
 # 2. Backend: configuração, dependências e tabelas
 cd backend
 Copy-Item .env.example .env
+# Opcional para ingestão/agente: edite .env e preencha VOYAGE_API_KEY / OPENAI_API_KEY
 uv sync
 uv run alembic upgrade head
 
@@ -57,6 +60,10 @@ Depois disso:
 | <http://127.0.0.1:8000/redoc> | Documentação em formato de leitura |
 | <http://127.0.0.1:8000/health> | Processo vivo |
 | <http://127.0.0.1:8000/ready> | Banco acessível |
+
+Roteiro de validação (bootstrap → catálogo → PDF → busca → agente): [00 — Guia de teste manual](00-guia-teste-manual.md).
+
+**Swagger + JWT:** em `/docs`, use **Authorize**, cole o `access_token` do bootstrap/login (com ou sem o prefixo `Bearer `, conforme a UI) e as demais rotas `/v1` passam a enviar o header.
 
 ## Configuração
 
@@ -98,8 +105,14 @@ O modelo completo está em `backend/.env.example` (copie para `.env` e preencha 
 | `OPENAI_API_KEY` | No agente | *(vazio)* | LLM `gpt-5-mini` |
 | `OPENAI_BASE_URL` | Opcional | `https://api.openai.com/v1` | |
 | `LLM_MODELO` | Opcional | `gpt-5-mini` | |
+| `JWT_SECRET` | Sim (trocar fora do PC local) | valor de exemplo | Assinatura do token — ver [13](13-auth.md) |
+| `JWT_EXPIRACAO_MINUTOS` | Opcional | `480` | Validade do access token |
+| `CORS_ORIGINS` | Se for usar frontend | `http://localhost:5173,...` | Origens permitidas |
+| `RATE_LIMIT_HABILITADO` | Opcional | `true` | Ver [18](18-rate-limit.md) |
+| `RATE_LIMIT_BACKEND` | Opcional | `memoria` | `memoria` ou `redis` |
+| `REDIS_URL` | Se backend=redis | — | Ex.: `redis://localhost:6379/0` |
 
-Opcionais de pool (padrão no código): `DB_POOL_SIZE` (5), `DB_MAX_OVERFLOW` (10), `DB_ECHO` (`false`).
+Opcionais de pool (padrão no código): `DB_POOL_SIZE` (5), `DB_MAX_OVERFLOW` (10), `DB_ECHO` (`false`). Lista completa comentada: `backend/.env.example`.
 
 ## Comandos do dia a dia
 
@@ -155,3 +168,8 @@ pre-commit install
 | `/ready` retorna 503 | Container parado ou porta errada | `docker compose ps`; `docker compose up -d --wait` |
 | Testes falham com erro de Docker | Docker Desktop não está aberto | Abra o Docker Desktop e rode de novo |
 | Tabela não existe ao chamar a API | Migrations não aplicadas | Em `backend/`: `uv run alembic upgrade head` |
+| Porta 8000 já em uso / uvicorn não sobe | Serviço `api` do Compose também está rodando | `docker compose stop api` e use só `db`; ou teste só pela imagem (`docker compose up -d --build`) |
+| 401 em todas as rotas `/v1` | Sem Bearer no Swagger | Bootstrap/login + **Authorize** em `/docs` — [00](00-guia-teste-manual.md) |
+| Upload OK mas documento não fica `INDEXADO` | Sem `VOYAGE_API_KEY` ou PDF sem texto | Preencha a chave; veja `erro_processamento` no GET do documento |
+| Agente retorna 503 | Sem `OPENAI_API_KEY` | Preencha no `backend/.env` e reinicie o uvicorn |
+| 429 Limite de requisições | Rate limit | Aguarde ~1 min ou aumente `RATE_LIMIT_*` / desligue com `RATE_LIMIT_HABILITADO=false` |

@@ -46,7 +46,7 @@ O repositório é um **monorepo**: cada aplicação fica em sua pasta, autoconti
 ```text
 AutomacaoIndustrial/
   README.md               página inicial (links para docs/)
-  docs/                   documentação do projeto todo
+  docs/                   documentação (comece por 00-guia-teste-manual.md)
   docker-compose.yml      Postgres + API (build do Dockerfile)
   .env.example            variáveis do docker-compose
   .github/workflows/      CI (ruff, mypy, pytest, build da imagem)

@@ -48,4 +48,4 @@ Em `ambiente=teste` a API usa `EmbeddingFake` (sem rede).
 
 ## Próximo passo
 
-Busca já disponível: [12 — Busca](12-busca.md). Em seguida: JWT + CORS e o agente Q&A.
+Busca: [12 — Busca](12-busca.md). Roteiro em casa: [00 — Guia de teste manual](00-guia-teste-manual.md).

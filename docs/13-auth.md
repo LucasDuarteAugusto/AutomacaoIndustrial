@@ -8,7 +8,14 @@ A API exige `Authorization: Bearer <token>` em todas as rotas `/v1/...`, exceto 
 2. Depois use `POST /v1/auth/login` com e-mail e senha.
 3. Envie o header em demais chamadas: `Authorization: Bearer <access_token>`.
 
-Bootstrap retorna **409** se já existir qualquer usuário.
+No Swagger: **Authorize** após o bootstrap/login. Bootstrap retorna **409** se já existir qualquer usuário.
+
+Exemplo rápido (PowerShell / após a API no ar):
+
+```powershell
+# Bootstrap (só na primeira vez)
+Invoke-RestMethod http://127.0.0.1:8000/v1/auth/bootstrap -Method Post -ContentType application/json -Body '{"email":"admin@example.com","senha":"senha-forte-123","nome":"Admin"}'
+```
 
 ## Perfis
 
@@ -60,4 +67,4 @@ Nos testes, `conftest` sobrescreve `get_usuario_atual` com um ADMIN sintético; 
 
 ## Próximo passo
 
-Agente: [14 — Agente](14-agente.md). Em seguida: `PARAMETROS` / `FALHAS` e Docker/CI.
+Teste ponta a ponta: [00 — Guia de teste manual](00-guia-teste-manual.md). Agente: [14](14-agente.md).

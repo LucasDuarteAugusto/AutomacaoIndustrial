@@ -36,6 +36,10 @@ Toda listagem aceita `limit` (1–100, padrão 20) e `offset` (padrão 0) e resp
 
 Rotas `/v1/...` exigem `Authorization: Bearer <token>`, exceto `POST /v1/auth/login` e `POST /v1/auth/bootstrap`. Detalhes e perfis: [13 — Auth](13-auth.md).
 
+No Swagger (`/docs`): faça bootstrap ou login → copie `access_token` → botão **Authorize** → informe o token. Sem isso, listagens e CRUDs retornam **401**.
+
+Roteiro completo de teste: [00 — Guia de teste manual](00-guia-teste-manual.md).
+
 ## Rotas
 
 ### Health

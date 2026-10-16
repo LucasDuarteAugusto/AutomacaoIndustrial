@@ -64,4 +64,4 @@ Exige Bearer (`exigir_usuario`). Perfil `LEITURA` pode perguntar (somente leitur
 
 ## Próximo passo
 
-Docker/CI; histórico de conversas; clientes.
+Roteiro de teste: [00 — Guia de teste manual](00-guia-teste-manual.md). Clientes React/Android; histórico de conversas.
