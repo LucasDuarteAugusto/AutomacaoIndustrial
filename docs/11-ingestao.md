@@ -48,4 +48,4 @@ Em `ambiente=teste` a API usa `EmbeddingFake` (sem rede).
 
 ## Próximo passo
 
-`POST /v1/busca` híbrida (vetor + textual + filtros de catálogo).
+Busca já disponível: [12 — Busca](12-busca.md). Em seguida: JWT + CORS e o agente Q&A.

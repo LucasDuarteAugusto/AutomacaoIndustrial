@@ -52,6 +52,8 @@ class Settings(BaseSettings):
     armazenamento_tamanho_max_bytes: int = Field(default=50 * 1024 * 1024, ge=1024)
     ingestao_tamanho_trecho_chars: int = Field(default=2500, ge=200, le=20000)
     ingestao_max_chars_lote_embedding: int = Field(default=80_000, ge=1000)
+    busca_candidatos_por_modo: int = Field(default=40, ge=5, le=200)
+    busca_rrf_k: int = Field(default=60, ge=1, le=200)
     s3_endpoint_url: str | None = None  # R2: https://<accountid>.r2.cloudflarestorage.com; AWS: omitir
     s3_region: str = "auto"
     s3_bucket: str | None = None

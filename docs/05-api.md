@@ -107,6 +107,19 @@ Limite: `ARMAZENAMENTO_TAMANHO_MAX_BYTES` (padrão 50 MiB). Após o upload, a in
 
 Roda de novo o pipeline sobre o PDF já armazenado (sem novo upload). `409` se já estiver `PROCESSANDO`. Detalhes em [11 — Ingestão](11-ingestao.md).
 
+### Busca — `/v1/busca`
+
+`POST /v1/busca` com JSON: `consulta` (obrigatória), `limit` (1–50), filtros opcionais (`id_fabricante`, `id_familia`, `id_equipamento`, `tipo_documento`, `idioma`, `versao_firmware`).
+
+Resposta: `{ consulta, items, total }` — trechos ranqueados por RRF (semântica + textual). Detalhes em [12 — Busca](12-busca.md).
+
+```powershell
+Invoke-RestMethod -Method Post "$api/v1/busca" -ContentType $ct -Body (Json @{
+  consulta = "tempo de rampa p1120"
+  limit = 5
+})
+```
+
 ```powershell
 $id = "<uuid-do-documento>"
 Invoke-RestMethod -Method Post "$api/v1/documentos/$id/arquivo" -Form @{

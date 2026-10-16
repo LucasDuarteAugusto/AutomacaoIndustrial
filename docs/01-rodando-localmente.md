@@ -81,6 +81,8 @@ O modelo completo está em `backend/.env.example` (copie para `.env` e preencha 
 | `ARMAZENAMENTO_TAMANHO_MAX_BYTES` | Opcional | `52428800` | Limite do upload de PDF (50 MiB) |
 | `INGESTAO_TAMANHO_TRECHO_CHARS` | Opcional | `2500` | Tamanho alvo dos trechos na ingestão |
 | `INGESTAO_MAX_CHARS_LOTE_EMBEDDING` | Opcional | `80000` | Limite por lote no Voyage contextualizado |
+| `BUSCA_CANDIDATOS_POR_MODO` | Opcional | `40` | Candidatos por modo na busca híbrida |
+| `BUSCA_RRF_K` | Opcional | `60` | Constante do Reciprocal Rank Fusion |
 | `S3_ENDPOINT_URL` | Só se `s3` (R2) | *(vazio)* | Endpoint R2; omitir na AWS |
 | `S3_REGION` | Só se `s3` | `auto` | `auto` no R2; região AWS depois |
 | `S3_BUCKET` | Só se `s3` | *(vazio)* | Nome do bucket |

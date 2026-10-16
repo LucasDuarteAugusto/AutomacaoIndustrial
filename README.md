@@ -45,6 +45,7 @@ Passo a passo completo e solução de problemas em [Rodando localmente](docs/01-
 | [09 — Estudo de modelos de IA](docs/09-estudo-modelos-ia.md) | Custo-benefício de modelos de embedding e LLM para a busca semântica e o agente |
 | [10 — Armazenamento](docs/10-armazenamento.md) | PDFs em disco (local) ou S3-compatível (Cloudflare R2 / AWS S3) |
 | [11 — Ingestão](docs/11-ingestao.md) | Pipeline PDF → trechos → embeddings Voyage → `TRECHOS` |
+| [12 — Busca](docs/12-busca.md) | Busca híbrida `POST /v1/busca` (vetor + textual + RRF) |
 
 ## Estrutura do repositório
 
