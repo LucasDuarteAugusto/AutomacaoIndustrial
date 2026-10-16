@@ -53,6 +53,7 @@ Passo a passo completo e solução de problemas em [Rodando localmente](docs/01-
 | [17 — Deploy](docs/17-deploy.md) | Compose prod, secrets, GHCR |
 | [18 — Rate limit](docs/18-rate-limit.md) | Limites por IP (memória; Redis depois) |
 | [19 — Escala](docs/19-escala.md) | Réplicas da API + nginx (load balancer) |
+| [20 — Redis](docs/20-redis.md) | Rate limit compartilhado entre réplicas |
 
 ## Estrutura do repositório
 
@@ -84,6 +85,7 @@ O repositório é um monorepo: o frontend (React) e o aplicativo (Android) entra
 | Dados estruturados (parâmetros e falhas) | Concluída |
 | Docker + CI (ruff, mypy, pytest) | Concluída |
 | Deploy estável (Compose prod + GHCR) | Concluída |
-| Rate limiting / escala / clientes | Planejada |
+| Rate limiting + escala + Redis | Concluída |
+| Clientes (React / Android) | Planejada |
 
 Detalhes em [Roadmap](docs/08-roadmap.md).

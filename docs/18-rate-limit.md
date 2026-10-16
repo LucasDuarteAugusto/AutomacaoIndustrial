@@ -16,7 +16,7 @@ Middleware por IP (`X-Forwarded-For` ou peer). Resposta **429** em `application/
 
 Desligar: `RATE_LIMIT_HABILITADO=false` (nos testes automáticos já vem desligado).
 
-Backend atual: **`memoria`** (por processo). Com várias réplicas o contador não é compartilhado — a etapa Redis resolve isso (`RATE_LIMIT_BACKEND=redis`).
+Backend: **`memoria`** (padrão) ou **`redis`** (`RATE_LIMIT_BACKEND=redis` + `REDIS_URL`). Com réplicas, use Redis — ver [20](20-redis.md).
 
 ## Código
 

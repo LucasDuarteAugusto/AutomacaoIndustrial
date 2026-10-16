@@ -1,4 +1,4 @@
-"""Rate limiting com backend em memória (Redis entra na etapa seguinte)."""
+"""Rate limiting com backend em memória ou Redis (compartilhado entre réplicas)."""
 
 from __future__ import annotations
 
@@ -8,19 +8,22 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Protocol
 
+from redis.asyncio import Redis
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.types import ASGIApp
 
 from app.core.config import Settings
-from app.core.errors import LimiteExcedido
+from app.core.errors import LimiteExcedido, RegraNegocio
 from app.core.handlers import problema
 
 
 class Limitador(Protocol):
     async def verificar(self, chave: str, limite: int, janela_segundos: int) -> tuple[bool, int]:
         """Retorna (permitido, retry_after_segundos)."""
+
+    async def fechar(self) -> None: ...
 
 
 class LimitadorMemoria:
@@ -40,6 +43,38 @@ class LimitadorMemoria:
             return False, retry_after
         fila.append(agora)
         return True, 0
+
+    async def fechar(self) -> None:
+        return None
+
+
+class LimitadorRedis:
+    """Janela deslizante compartilhada via Redis (várias réplicas da API)."""
+
+    def __init__(self, cliente: Redis) -> None:
+        self._cliente = cliente
+
+    async def verificar(self, chave: str, limite: int, janela_segundos: int) -> tuple[bool, int]:
+        agora = time.time()
+        inicio = agora - janela_segundos
+        chave_r = f"rl:{chave}"
+        await self._cliente.zremrangebyscore(chave_r, 0, inicio)
+        total = int(await self._cliente.zcard(chave_r))
+        if total >= limite:
+            mais_antigo = await self._cliente.zrange(chave_r, 0, 0, withscores=True)
+            if mais_antigo:
+                score = float(mais_antigo[0][1])
+                retry_after = max(1, int(janela_segundos - (agora - score)) + 1)
+            else:
+                retry_after = janela_segundos
+            return False, retry_after
+        membro = f"{agora:.6f}"
+        await self._cliente.zadd(chave_r, {membro: agora})
+        await self._cliente.expire(chave_r, janela_segundos)
+        return True, 0
+
+    async def fechar(self) -> None:
+        await self._cliente.aclose()
 
 
 @dataclass(frozen=True)
@@ -116,6 +151,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
 
 def criar_limitador(settings: Settings) -> Limitador:
-    """Factory: memória agora; Redis na etapa de escala compartilhada."""
-    _ = settings.rate_limit_backend  # reservado para redis
+    if settings.rate_limit_backend == "redis":
+        if not settings.redis_url:
+            raise RegraNegocio("RATE_LIMIT_BACKEND=redis exige REDIS_URL.")
+        cliente = Redis.from_url(settings.redis_url, decode_responses=True)
+        return LimitadorRedis(cliente)
     return LimitadorMemoria()

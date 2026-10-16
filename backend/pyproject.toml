@@ -20,6 +20,7 @@ dependencies = [
     "pyjwt~=2.15",
     "pymupdf~=1.26",
     "python-multipart~=0.0.20",
+    "redis~=5.0",
     "sqlalchemy[asyncio]~=2.1",
     "structlog~=26.1",
     "uvicorn[standard]~=0.54",

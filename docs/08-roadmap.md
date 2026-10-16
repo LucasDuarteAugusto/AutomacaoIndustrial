@@ -44,5 +44,5 @@
 - [x] Deploy estável (`feat/deploy`): compose prod, secrets, push GHCR; ver [17 — Deploy](17-deploy.md).
 - [x] Rate limiting por IP (`feat/deploy`); ver [18 — Rate limit](18-rate-limit.md).
 - [x] Réplicas + load balancer nginx (`feat/deploy`); ver [19 — Escala](19-escala.md).
-- [ ] Redis para rate limit compartilhado entre réplicas.
+- [x] Redis para rate limit compartilhado (`feat/deploy`); ver [20 — Redis](20-redis.md).
 - [ ] Frontend React e aplicativo Android consumindo o OpenAPI.

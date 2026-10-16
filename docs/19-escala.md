@@ -41,4 +41,4 @@ docker compose `
 
 ## Próximo passo
 
-Redis compartilhado para rate limiting (e base para cache/filas depois).
+Redis: [20 — Redis](20-redis.md) (`docker-compose.redis.yml`).

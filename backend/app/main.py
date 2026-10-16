@@ -30,6 +30,7 @@ log = structlog.get_logger()
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     configurar_logging(settings)
+    limitador = criar_limitador(settings)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -37,6 +38,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.settings = settings
         app.state.engine = engine
         app.state.sessionmaker = criar_sessionmaker(engine)
+        app.state.limitador = limitador
         async with httpx.AsyncClient() as cliente_http:
             app.state.http_client = cliente_http
             if settings.ambiente == "teste":
@@ -46,7 +48,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 app.state.provedor_embedding = criar_provedor_embedding(settings, cliente_http)
                 app.state.provedor_llm = criar_provedor_llm(settings, cliente_http)
             app.state.armazenamento = criar_armazenamento(settings)
-            app.state.limitador = criar_limitador(settings)
             log.info(
                 "app_iniciada",
                 ambiente=settings.ambiente,
@@ -57,7 +58,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 rate_limit_habilitado=settings.rate_limit_habilitado,
                 rate_limit_backend=settings.rate_limit_backend,
             )
-            yield
+            try:
+                yield
+            finally:
+                await limitador.fechar()
         await engine.dispose()
         log.info("app_encerrada")
 
@@ -69,11 +73,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    # Rate limit por IP (memória; Redis na etapa de escala). Desligado em ambiente=teste via Settings.
     app.add_middleware(
         RateLimitMiddleware,
         settings=settings,
-        limitador=criar_limitador(settings),
+        limitador=limitador,
     )
     registrar_handlers(app)
     app.include_router(health_router)
