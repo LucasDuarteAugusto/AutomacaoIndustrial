@@ -77,6 +77,8 @@ app/
   catalogo/             tipos de equipamento, fabricantes, famílias, equipamentos
   documentos/           documentos e vínculos com famílias/equipamentos
   trechos/              pedaços indexáveis (embedding + tsvector)
+  busca/                busca híbrida (vetor + tsvector + RRF)
+  agente/               Q&A com citação (busca + LLM)
   ia/                   provedores Voyage (embedding) e OpenAI (LLM)
   armazenamento/        PDFs: local (padrão) ou S3-compatível (R2 / AWS)
   ingestao/             PDF → chunking → embeddings → TRECHOS

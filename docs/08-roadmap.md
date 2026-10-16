@@ -32,8 +32,8 @@
 
 ### 4 — Agente de IA
 
-- [ ] Endpoint de pergunta e resposta com citação das fontes (documento, página, seção).
-- [ ] Ferramentas do agente: busca híbrida, consulta de parâmetro, consulta de falha.
+- [x] Endpoint de pergunta e resposta com citação das fontes (`feat/agente-qa`); ver [14 — Agente](14-agente.md). Usa busca híbrida como retriever.
+- [ ] Ferramentas do agente: consulta de parâmetro e de falha (depende da fase 3).
 - [ ] Histórico de conversas por usuário.
 
 ### 5 — Produção e clientes

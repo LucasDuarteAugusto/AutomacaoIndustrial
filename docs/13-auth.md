@@ -60,4 +60,4 @@ Nos testes, `conftest` sobrescreve `get_usuario_atual` com um ADMIN sintético; 
 
 ## Próximo passo
 
-Agente Q&A com citação de fontes (usando a busca híbrida).
+Agente: [14 — Agente](14-agente.md). Em seguida: `PARAMETROS` / `FALHAS` e Docker/CI.

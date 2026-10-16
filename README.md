@@ -47,13 +47,14 @@ Passo a passo completo e solução de problemas em [Rodando localmente](docs/01-
 | [11 — Ingestão](docs/11-ingestao.md) | Pipeline PDF → trechos → embeddings Voyage → `TRECHOS` |
 | [12 — Busca](docs/12-busca.md) | Busca híbrida `POST /v1/busca` (vetor + textual + RRF) |
 | [13 — Auth](docs/13-auth.md) | JWT (perfis ADMIN/OPERADOR/LEITURA) e CORS |
+| [14 — Agente](docs/14-agente.md) | Q&A com busca híbrida, LLM e citações |
 
 ## Estrutura do repositório
 
 ```text
 AutomacaoIndustrial/
 ├── backend/             API FastAPI (Python 3.14, SQLAlchemy async, Alembic)
-│   ├── app/             código: core/, auth/, catalogo/, documentos/, busca/, health/
+│   ├── app/             código: core/, auth/, catalogo/, documentos/, busca/, agente/, health/
 │   ├── migrations/      versões do schema
 │   └── tests/           testes contra PostgreSQL real (testcontainers)
 ├── docs/                documentação
@@ -71,7 +72,8 @@ O repositório é um monorepo: o frontend (React) e o aplicativo (Android) entra
 | Catálogo de equipamentos e documentos | Concluída |
 | Ingestão de PDFs e busca semântica | Concluída |
 | Autenticação JWT + CORS | Concluída |
+| Agente Q&A com citações | Concluída |
 | Dados estruturados (parâmetros e falhas) | Planejada |
-| Agente de IA e clientes | Planejada |
+| Clientes (React / Android) e Docker/CI | Planejada |
 
 Detalhes em [Roadmap](docs/08-roadmap.md).

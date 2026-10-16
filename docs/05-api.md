@@ -54,6 +54,14 @@ Rotas `/v1/...` exigem `Authorization: Bearer <token>`, exceto `POST /v1/auth/lo
 | `GET /me` | Usuário do token |
 | `POST /usuarios`, `PATCH /usuarios/{id}` | CRUD de usuários (`ADMIN`) |
 
+### Agente — `/v1/agente`
+
+| Rota | Descrição |
+|---|---|
+| `POST /perguntar` | Q&A com busca híbrida + LLM e citações (documento, página, seção) |
+
+Detalhes: [14 — Agente](14-agente.md).
+
 ### Tipos de equipamento — `/v1/tipos-equipamento`
 
 Somente leitura (cadastrados por migration). `GET` lista e `GET /{id}`.

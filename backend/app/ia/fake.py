@@ -34,3 +34,16 @@ class EmbeddingFake:
         vetor[0] = (len(texto) % 1000) / 1000.0
         vetor[1] = (sum(ord(c) for c in texto[:64]) % 1000) / 1000.0
         return vetor
+
+
+class LLMFake:
+    """LLM determinístico para testes (sem chamar OpenAI)."""
+
+    @property
+    def modelo(self) -> str:
+        return "fake-llm"
+
+    async def completar(self, *, sistema: str, usuario: str) -> str:
+        if not usuario.strip():
+            raise RegraNegocio("Mensagem do usuário vazia para o LLM")
+        return "Com base nos trechos fornecidos, a informação solicitada aparece na documentação técnica. [1]"

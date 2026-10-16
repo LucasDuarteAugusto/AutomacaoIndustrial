@@ -44,4 +44,4 @@ Lista de trechos com `score` (RRF), `distancia_cosseno` (menor = mais próximo),
 
 ## Próximo passo
 
-Auth: [13 — Autenticação](13-auth.md). Em seguida: agente Q&A usando esta busca.
+O agente Q&A consome esta busca: [14 — Agente](14-agente.md).

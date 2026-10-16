@@ -6,6 +6,7 @@ import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.agente.router import router as agente_router
 from app.armazenamento.factory import criar_armazenamento
 from app.auth.router import router as auth_router
 from app.busca.router import router as busca_router
@@ -17,7 +18,7 @@ from app.core.logging import configurar_logging
 from app.documentos.router import router as documentos_router
 from app.health.router import router as health_router
 from app.ia.embedding import criar_provedor_embedding
-from app.ia.fake import EmbeddingFake
+from app.ia.fake import EmbeddingFake, LLMFake
 from app.ia.llm import criar_provedor_llm
 
 log = structlog.get_logger()
@@ -37,16 +38,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             app.state.http_client = cliente_http
             if settings.ambiente == "teste":
                 app.state.provedor_embedding = EmbeddingFake(settings.embedding_dimensao)
+                app.state.provedor_llm = LLMFake()
             else:
                 app.state.provedor_embedding = criar_provedor_embedding(settings, cliente_http)
-            app.state.provedor_llm = criar_provedor_llm(settings, cliente_http)
+                app.state.provedor_llm = criar_provedor_llm(settings, cliente_http)
             app.state.armazenamento = criar_armazenamento(settings)
             log.info(
                 "app_iniciada",
                 ambiente=settings.ambiente,
                 embedding_modelo=settings.embedding_modelo if settings.ambiente != "teste" else "fake-embedding",
                 embedding_dimensao=settings.embedding_dimensao,
-                llm_modelo=settings.llm_modelo,
+                llm_modelo="fake-llm" if settings.ambiente == "teste" else settings.llm_modelo,
                 armazenamento_tipo=settings.armazenamento_tipo,
             )
             yield
@@ -64,6 +66,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     registrar_handlers(app)
     app.include_router(health_router)
     app.include_router(auth_router)
-    for router in (*catalogo_routers, documentos_router, busca_router):
+    for router in (*catalogo_routers, documentos_router, busca_router, agente_router):
         app.include_router(router)
     return app
