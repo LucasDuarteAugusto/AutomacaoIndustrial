@@ -1,0 +1,47 @@
+# Sobrepõe o compose base para um ambiente estável (VPS / homelab / staging).
+# Uso:
+#   Copy-Item .env.production.example .env.production
+#   # edite senhas e JWT_SECRET
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file .env.production up -d
+#
+# Imagem: por padrão faz build local. Para puxar do GHCR, defina:
+#   API_IMAGE=ghcr.io/<org>/automacao-industrial-api:development
+
+name: automacao-industrial
+
+services:
+  db:
+    restart: unless-stopped
+    # Em produção o Postgres não fica exposto na rede do host (Compose 2.24+).
+    ports: !reset []
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+  api:
+    restart: unless-stopped
+    image: ${API_IMAGE:-automacao-industrial-api:prod}
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      AMBIENTE: producao
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_JSON: "true"
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      ARMAZENAMENTO_TIPO: ${ARMAZENAMENTO_TIPO:-local}
+      ARMAZENAMENTO_CAMINHO: /data/arquivos
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRACAO_MINUTOS: ${JWT_EXPIRACAO_MINUTOS:-480}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      VOYAGE_API_KEY: ${VOYAGE_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-}
+      S3_REGION: ${S3_REGION:-auto}
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+    ports:
+      - "${API_PORT:-8000}:8000"

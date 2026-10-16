@@ -50,6 +50,7 @@ Passo a passo completo e solução de problemas em [Rodando localmente](docs/01-
 | [14 — Agente](docs/14-agente.md) | Q&A com busca híbrida, LLM e citações |
 | [15 — Parâmetros e falhas](docs/15-parametros-falhas.md) | Tabelas estruturadas + lookup no agente |
 | [16 — Docker e CI](docs/16-docker-ci.md) | Imagem da API, Compose e GitHub Actions |
+| [17 — Deploy](docs/17-deploy.md) | Compose prod, secrets, GHCR |
 
 ## Estrutura do repositório
 
@@ -62,7 +63,8 @@ AutomacaoIndustrial/
 │   └── tests/           testes contra PostgreSQL real (testcontainers)
 ├── docs/                documentação
 ├── docker-compose.yml   PostgreSQL 17 + pgvector (+ serviço api)
-├── .github/workflows/   CI (ruff, mypy, pytest, build Docker)
+├── docker-compose.prod.yml  override para deploy estável
+├── .github/workflows/   CI + CD (GHCR)
 └── .cursor/             regras e automações do assistente de IA
 ```
 
@@ -79,6 +81,7 @@ O repositório é um monorepo: o frontend (React) e o aplicativo (Android) entra
 | Agente Q&A com citações | Concluída |
 | Dados estruturados (parâmetros e falhas) | Concluída |
 | Docker + CI (ruff, mypy, pytest) | Concluída |
-| Deploy e clientes (React / Android) | Planejada |
+| Deploy estável (Compose prod + GHCR) | Concluída |
+| Rate limiting / escala / clientes | Planejada |
 
 Detalhes em [Roadmap](docs/08-roadmap.md).

@@ -16,8 +16,9 @@ Não use `pip install` nem ative a venv manualmente: tudo roda via `uv run`.
 ```text
 AutomacaoIndustrial/
 ├── docker-compose.yml   Postgres + API (opcional)                 → comandos docker na RAIZ
+├── docker-compose.prod.yml  override de deploy estável
 ├── .env                 variáveis do docker-compose
-├── .github/workflows/   CI (ruff, mypy, pytest, build Docker)
+├── .github/workflows/   CI + CD (GHCR)
 ├── docs/
 └── backend/             projeto Python (FastAPI)                   → comandos uv na pasta backend/
     ├── Dockerfile       imagem da API

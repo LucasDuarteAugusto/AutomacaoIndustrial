@@ -41,5 +41,6 @@
 - [x] Autenticação JWT (pyjwt + pwdlib/argon2) e perfis (`feat/auth-jwt-cors`); ver [13 — Auth](13-auth.md).
 - [x] CORS para o frontend React.
 - [x] `Dockerfile` da API e pipeline de CI (`feat/docker-ci`); ver [16 — Docker e CI](16-docker-ci.md).
-- [ ] Deploy (banco gerenciado com pgvector + container da API).
+- [x] Deploy estável (`feat/deploy`): compose prod, secrets, push GHCR; ver [17 — Deploy](17-deploy.md).
+- [ ] Rate limiting (proteção sob pico; antes de N réplicas / Redis).
 - [ ] Frontend React e aplicativo Android consumindo o OpenAPI.

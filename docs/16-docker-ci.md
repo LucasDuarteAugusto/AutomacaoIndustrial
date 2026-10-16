@@ -43,6 +43,10 @@ Workflow [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) em push/PR pa
 
 Além de `POSTGRES_*`, o serviço `api` lê `API_PORT`, `JWT_SECRET`, `CORS_ORIGINS`, `VOYAGE_API_KEY`, `OPENAI_API_KEY`, etc. Modelo: `.env.example` na raiz.
 
+## CD
+
+Publicação da imagem no GHCR: [17 — Deploy](17-deploy.md) (workflow `.github/workflows/cd.yml`).
+
 ## Próximo passo
 
-Deploy (banco gerenciado + registry) e clientes React/Android.
+Deploy estável na VPS/cloud; depois rate limiting.
