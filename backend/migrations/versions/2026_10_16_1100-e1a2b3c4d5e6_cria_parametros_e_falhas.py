@@ -4,6 +4,7 @@ Create Date: 2026-10-16 11:00:00.000000
 """
 
 from collections.abc import Sequence
+from typing import Any
 
 import sqlalchemy as sa
 from alembic import op
@@ -22,7 +23,7 @@ def _nao_existe(tabela: str) -> bool:
     return not sa.inspect(op.get_bind()).has_table(tabela)
 
 
-def _timestamps() -> list[sa.Column]:
+def _timestamps() -> list[sa.Column[Any]]:
     return [
         sa.Column(
             "createdAt",
