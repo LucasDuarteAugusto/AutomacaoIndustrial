@@ -14,6 +14,7 @@ from app.core.logging import configurar_logging
 from app.documentos.router import router as documentos_router
 from app.health.router import router as health_router
 from app.ia.embedding import criar_provedor_embedding
+from app.ia.fake import EmbeddingFake
 from app.ia.llm import criar_provedor_llm
 
 log = structlog.get_logger()
@@ -31,13 +32,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.sessionmaker = criar_sessionmaker(engine)
         async with httpx.AsyncClient() as cliente_http:
             app.state.http_client = cliente_http
-            app.state.provedor_embedding = criar_provedor_embedding(settings, cliente_http)
+            if settings.ambiente == "teste":
+                app.state.provedor_embedding = EmbeddingFake(settings.embedding_dimensao)
+            else:
+                app.state.provedor_embedding = criar_provedor_embedding(settings, cliente_http)
             app.state.provedor_llm = criar_provedor_llm(settings, cliente_http)
             app.state.armazenamento = criar_armazenamento(settings)
             log.info(
                 "app_iniciada",
                 ambiente=settings.ambiente,
-                embedding_modelo=settings.embedding_modelo,
+                embedding_modelo=settings.embedding_modelo if settings.ambiente != "teste" else "fake-embedding",
                 embedding_dimensao=settings.embedding_dimensao,
                 llm_modelo=settings.llm_modelo,
                 armazenamento_tipo=settings.armazenamento_tipo,

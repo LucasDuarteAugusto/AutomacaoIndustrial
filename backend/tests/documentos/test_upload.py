@@ -1,13 +1,25 @@
 import hashlib
 from uuid import UUID, uuid4
 
+import fitz
 from httpx import AsyncClient
 
 from app.armazenamento.chave import chave_documento
 from tests.factories import criar_documento
 
-PDF_MINIMO = b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n"
-PDF_OUTRO = b"%PDF-1.7\n1 0 obj<< /Type /Catalog >>endobj\ntrailer<<>>\n%%EOF\n"
+
+def _pdf(texto: str = "Tempo de rampa padrão: 10 s.") -> bytes:
+    documento = fitz.open()
+    try:
+        pagina = documento.new_page()
+        pagina.insert_text((72, 72), texto)
+        return bytes(documento.tobytes())
+    finally:
+        documento.close()
+
+
+PDF_MINIMO = _pdf("Conteúdo mínimo para upload.")
+PDF_OUTRO = _pdf("Outro conteúdo distinto do primeiro PDF.")
 
 
 async def test_upload_pdf_atualiza_metadados(client: AsyncClient) -> None:
@@ -25,8 +37,9 @@ async def test_upload_pdf_atualiza_metadados(client: AsyncClient) -> None:
     assert corpo["hash_sha256"] == digest
     assert corpo["tamanho_bytes"] == len(PDF_MINIMO)
     assert corpo["chave_arquivo"] == chave_documento(UUID(id_doc), digest)
-    assert corpo["status_processamento"] == "PENDENTE"
+    assert corpo["status_processamento"] == "INDEXADO"
     assert corpo["erro_processamento"] is None
+    assert corpo["paginas"] is not None and corpo["paginas"] >= 1
 
 
 async def test_upload_idempotente_mesmo_hash(client: AsyncClient) -> None:
@@ -42,6 +55,7 @@ async def test_upload_idempotente_mesmo_hash(client: AsyncClient) -> None:
     )
     assert resp.status_code == 200
     assert resp.json()["hash_sha256"] == hashlib.sha256(PDF_MINIMO).hexdigest()
+    assert resp.json()["status_processamento"] == "INDEXADO"
 
 
 async def test_upload_nao_pdf_retorna_422(client: AsyncClient) -> None:
@@ -91,6 +105,7 @@ async def test_upload_substitui_arquivo_diferente(client: AsyncClient) -> None:
     assert resp.status_code == 200
     assert resp.json()["hash_sha256"] == hashlib.sha256(PDF_OUTRO).hexdigest()
     assert resp.json()["tamanho_bytes"] == len(PDF_OUTRO)
+    assert resp.json()["status_processamento"] == "INDEXADO"
 
 
 async def test_excluir_documento_com_arquivo_retorna_204(client: AsyncClient) -> None:

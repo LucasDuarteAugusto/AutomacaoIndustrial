@@ -15,6 +15,7 @@ dependencies = [
     "pgvector~=0.5",
     "pydantic~=2.14",
     "pydantic-settings~=2.16",
+    "pymupdf~=1.26",
     "python-multipart~=0.0.20",
     "sqlalchemy[asyncio]~=2.1",
     "structlog~=26.1",
@@ -54,7 +55,7 @@ mypy_path = "."
 explicit_package_bases = true
 
 [[tool.mypy.overrides]]
-module = ["testcontainers.*", "aioboto3.*", "aiobotocore.*", "botocore.*", "boto3.*"]
+module = ["testcontainers.*", "aioboto3.*", "aiobotocore.*", "botocore.*", "boto3.*", "fitz"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

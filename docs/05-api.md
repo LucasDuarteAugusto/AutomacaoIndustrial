@@ -101,7 +101,11 @@ Campos de arquivo (ingestão): `chave_arquivo`, `hash_sha256`, `tamanho_bytes`, 
 | Mesmo arquivo já ligado a **outro** documento | 409 |
 | Não é PDF / vazio / acima do limite | 422 |
 
-Limite: `ARMAZENAMENTO_TAMANHO_MAX_BYTES` (padrão 50 MiB). `paginas` continua `null` até o pipeline de trechos. Trocar o PDF (hash diferente) apaga o arquivo antigo e os `TRECHOS` do documento. Excluir o documento também remove o arquivo do armazenamento.
+Limite: `ARMAZENAMENTO_TAMANHO_MAX_BYTES` (padrão 50 MiB). Após o upload, a ingestão roda em background (síncrona em `ambiente=teste`): preenche `paginas`, grava `TRECHOS` e passa a `INDEXADO` (ou `ERRO`). Trocar o PDF (hash diferente) apaga o arquivo antigo e os trechos. Excluir o documento também remove o arquivo do armazenamento.
+
+#### Reprocessar — `POST /v1/documentos/{id}/reprocessar`
+
+Roda de novo o pipeline sobre o PDF já armazenado (sem novo upload). `409` se já estiver `PROCESSANDO`. Detalhes em [11 — Ingestão](11-ingestao.md).
 
 ```powershell
 $id = "<uuid-do-documento>"

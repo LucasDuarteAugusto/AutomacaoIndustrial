@@ -94,4 +94,4 @@ Fluxo: validar PDF → SHA-256 → `chave_documento` → `armazenamento.salvar` 
 
 ## Próximo passo
 
-Pipeline: extrair texto do PDF → chunking → embeddings Voyage → gravar `TRECHOS` → `STATUS_PROCESSAMENTO=INDEXADO`.
+Busca híbrida: ver [11 — Ingestão](11-ingestao.md) (pipeline já implementado) e depois `POST /v1/busca`.

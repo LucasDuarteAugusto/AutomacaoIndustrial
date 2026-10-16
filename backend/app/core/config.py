@@ -50,6 +50,8 @@ class Settings(BaseSettings):
     armazenamento_tipo: Literal["local", "s3"] = "local"
     armazenamento_caminho: str = "data/arquivos"
     armazenamento_tamanho_max_bytes: int = Field(default=50 * 1024 * 1024, ge=1024)
+    ingestao_tamanho_trecho_chars: int = Field(default=2500, ge=200, le=20000)
+    ingestao_max_chars_lote_embedding: int = Field(default=80_000, ge=1000)
     s3_endpoint_url: str | None = None  # R2: https://<accountid>.r2.cloudflarestorage.com; AWS: omitir
     s3_region: str = "auto"
     s3_bucket: str | None = None

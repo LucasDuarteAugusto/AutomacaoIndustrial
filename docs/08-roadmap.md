@@ -19,9 +19,9 @@
 - [x] Núcleo IA + `TRECHOS` (branch `feat/ingestao-busca`): Settings (Voyage/OpenAI), `ProvedorEmbedding` / `ProvedorLLM`, tabela `TRECHOS` com `vector(1024)`, HNSW e `tsvector`.
 - [x] Armazenamento de arquivos (`feat/armazenamento-local`): `ArmazenamentoLocal` padrão; adaptador S3-compatível pronto para Cloudflare R2 (e AWS S3 depois).
 - [x] Upload de PDF (`feat/upload-documento`): `POST /v1/documentos/{id}/arquivo` → hash, chave, tamanho; deduplicação por SHA-256; troca de arquivo limpa trechos.
+- [x] Pipeline de ingestão (`feat/pipeline-ingestao`): PyMuPDF → chunking → Voyage → `TRECHOS`; `POST .../reprocessar`; ver [11 — Ingestão](11-ingestao.md).
 - [ ] Validar recall@5 com 30 a 50 perguntas reais sobre 2 ou 3 manuais (antes de fechar o modelo em produção).
 - [ ] Descrição de figuras (diagramas, telas de IHM) por LLM com visão, indexada como trecho de texto.
-- [ ] Processamento em segundo plano: extração de texto e tabelas, divisão em trechos por seção e tipo de conteúdo, geração de embeddings, atualização de `STATUS_PROCESSAMENTO`.
 - [ ] `POST /v1/busca`: busca híbrida (vetorial + textual) com filtros por fabricante, família, modelo, tipo de documento, idioma e firmware.
 
 ### 3 — Dados estruturados

@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from dataclasses import dataclass
 from uuid import UUID
 
 from sqlalchemy import delete
@@ -16,9 +17,17 @@ from app.documentos.arquivo import hash_sha256, validar_pdf
 from app.documentos.models import Documento, Idioma, StatusProcessamento, TipoDocumento
 from app.documentos.repository import DocumentoRepository
 from app.documentos.schemas import DocumentoCreate, DocumentoOut, DocumentoUpdate
+from app.ia.embedding import ProvedorEmbedding
+from app.ingestao.pipeline import processar_documento
 from app.trechos.models import Trecho
 
 CAMPOS_VINCULO = {"ids_familias", "ids_equipamentos"}
+
+
+@dataclass(frozen=True, slots=True)
+class ResultadoUpload:
+    documento: DocumentoOut
+    agendar_ingestao: bool
 
 
 def _sem_repetidos(ids: Sequence[UUID]) -> list[UUID]:
@@ -26,9 +35,16 @@ def _sem_repetidos(ids: Sequence[UUID]) -> list[UUID]:
 
 
 class DocumentoService:
-    def __init__(self, session: AsyncSession, armazenamento: ArmazenamentoArquivos, settings: Settings) -> None:
+    def __init__(
+        self,
+        session: AsyncSession,
+        armazenamento: ArmazenamentoArquivos,
+        embedding: ProvedorEmbedding,
+        settings: Settings,
+    ) -> None:
         self.session = session
         self.armazenamento = armazenamento
+        self.embedding = embedding
         self.settings = settings
         self.documentos = DocumentoRepository(session)
         self.familias = FamiliaRepository(session)
@@ -109,7 +125,7 @@ class DocumentoService:
         await self.session.commit()
         return DocumentoOut.model_validate(documento)
 
-    async def enviar_arquivo(self, id_documento: UUID, conteudo: bytes) -> DocumentoOut:
+    async def enviar_arquivo(self, id_documento: UUID, conteudo: bytes) -> ResultadoUpload:
         validar_pdf(conteudo, tamanho_max=self.settings.armazenamento_tamanho_max_bytes)
         digest = hash_sha256(conteudo)
         documento = await self._obter(id_documento)
@@ -119,7 +135,8 @@ class DocumentoService:
             and documento.chave_arquivo
             and await self.armazenamento.existe(documento.chave_arquivo)
         ):
-            return DocumentoOut.model_validate(documento)
+            ja_indexado = documento.status_processamento == StatusProcessamento.INDEXADO
+            return ResultadoUpload(DocumentoOut.model_validate(documento), agendar_ingestao=not ja_indexado)
 
         outro = await self.documentos.obter_por_hash(digest)
         if outro is not None and outro.id_documento != id_documento:
@@ -138,9 +155,30 @@ class DocumentoService:
         documento.tamanho_bytes = len(conteudo)
         documento.status_processamento = StatusProcessamento.PENDENTE
         documento.erro_processamento = None
-        # paginas preenchidas na ingestão (pipeline de trechos)
+        documento.paginas = None
+        await self.session.commit()
+        return ResultadoUpload(DocumentoOut.model_validate(documento), agendar_ingestao=True)
+
+    async def preparar_reprocessamento(self, id_documento: UUID) -> DocumentoOut:
+        documento = await self._obter(id_documento)
+        if not documento.chave_arquivo:
+            raise RegraNegocio("Documento sem arquivo para reprocessar.")
+        if documento.status_processamento == StatusProcessamento.PROCESSANDO:
+            raise Conflito("Documento já está em processamento.")
+        documento.status_processamento = StatusProcessamento.PENDENTE
+        documento.erro_processamento = None
         await self.session.commit()
         return DocumentoOut.model_validate(documento)
+
+    async def executar_ingestao(self, id_documento: UUID) -> DocumentoOut:
+        await processar_documento(
+            self.session,
+            armazenamento=self.armazenamento,
+            embedding=self.embedding,
+            settings=self.settings,
+            id_documento=id_documento,
+        )
+        return DocumentoOut.model_validate(await self._obter(id_documento))
 
     async def excluir(self, id_documento: UUID) -> None:
         documento = await self._obter(id_documento)

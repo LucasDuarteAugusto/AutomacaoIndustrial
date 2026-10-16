@@ -79,6 +79,7 @@ app/
   trechos/              pedaços indexáveis (embedding + tsvector)
   ia/                   provedores Voyage (embedding) e OpenAI (LLM)
   armazenamento/        PDFs: local (padrão) ou S3-compatível (R2 / AWS)
+  ingestao/             PDF → chunking → embeddings → TRECHOS
 migrations/             Alembic
 tests/                  espelha app/
 data/arquivos/          (gitignored) PDFs quando ARMAZENAMENTO_TIPO=local
