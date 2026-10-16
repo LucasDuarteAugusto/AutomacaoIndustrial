@@ -7,6 +7,7 @@ authors = [
 ]
 requires-python = ">=3.14,<3.15"
 dependencies = [
+    "aioboto3~=15.0",
     "alembic~=1.20",
     "asyncpg~=0.32",
     "fastapi~=0.143",
@@ -52,7 +53,7 @@ mypy_path = "."
 explicit_package_bases = true
 
 [[tool.mypy.overrides]]
-module = ["testcontainers.*"]
+module = ["testcontainers.*", "aioboto3.*", "aiobotocore.*", "botocore.*", "boto3.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

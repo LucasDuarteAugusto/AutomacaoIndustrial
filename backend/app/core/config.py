@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, PostgresDsn, SecretStr
+from pydantic import Field, PostgresDsn, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.core.ia_defaults import (
@@ -10,6 +10,17 @@ from app.core.ia_defaults import (
     LLM_MODELO_PADRAO,
     OPENAI_BASE_URL_PADRAO,
     VOYAGE_BASE_URL_PADRAO,
+)
+
+_CAMPOS_VAZIOS_COMO_NONE = frozenset(
+    {
+        "voyage_api_key",
+        "openai_api_key",
+        "s3_endpoint_url",
+        "s3_bucket",
+        "s3_access_key_id",
+        "s3_secret_access_key",
+    }
 )
 
 
@@ -34,6 +45,22 @@ class Settings(BaseSettings):
     openai_api_key: SecretStr | None = None
     openai_base_url: str = OPENAI_BASE_URL_PADRAO
     llm_modelo: str = LLM_MODELO_PADRAO
+
+    # local = pasta no disco; s3 = API S3-compatível (Cloudflare R2 ou AWS S3)
+    armazenamento_tipo: Literal["local", "s3"] = "local"
+    armazenamento_caminho: str = "data/arquivos"
+    s3_endpoint_url: str | None = None  # R2: https://<accountid>.r2.cloudflarestorage.com; AWS: omitir
+    s3_region: str = "auto"
+    s3_bucket: str | None = None
+    s3_access_key_id: SecretStr | None = None
+    s3_secret_access_key: SecretStr | None = None
+
+    @field_validator(*sorted(_CAMPOS_VAZIOS_COMO_NONE), mode="before")
+    @classmethod
+    def _vazio_vira_none(cls, valor: object) -> object:
+        if valor == "":
+            return None
+        return valor
 
 
 @lru_cache

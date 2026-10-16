@@ -28,8 +28,14 @@ def database_url() -> Iterator[str]:
 
 
 @pytest.fixture(scope="session")
-def settings(database_url: str) -> Settings:
-    return Settings(database_url=database_url, ambiente="teste")
+def settings(database_url: str, tmp_path_factory: pytest.TempPathFactory) -> Settings:
+    pasta_arquivos = tmp_path_factory.mktemp("arquivos")
+    return Settings(
+        database_url=database_url,
+        ambiente="teste",
+        armazenamento_tipo="local",
+        armazenamento_caminho=str(pasta_arquivos),
+    )
 
 
 @pytest.fixture(scope="session")

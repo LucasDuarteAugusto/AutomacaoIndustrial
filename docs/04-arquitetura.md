@@ -76,9 +76,22 @@ app/
   health/router.py      /health e /ready
   catalogo/             tipos de equipamento, fabricantes, famílias, equipamentos
   documentos/           documentos e vínculos com famílias/equipamentos
+  trechos/              pedaços indexáveis (embedding + tsvector)
+  ia/                   provedores Voyage (embedding) e OpenAI (LLM)
+  armazenamento/        PDFs: local (padrão) ou S3-compatível (R2 / AWS)
 migrations/             Alembic
 tests/                  espelha app/
+data/arquivos/          (gitignored) PDFs quando ARMAZENAMENTO_TIPO=local
 ```
+
+### Armazenamento de arquivos
+
+Interface `ArmazenamentoArquivos` (`salvar`, `carregar`, `existe`, `apagar`). Chave portátil: `{id_documento}/{sha256}.pdf`.
+
+| `ARMAZENAMENTO_TIPO` | Uso |
+|---|---|
+| `local` (padrão) | Pasta `ARMAZENAMENTO_CAMINHO` (ex.: `data/arquivos`) |
+| `s3` | Cloudflare R2 ou AWS S3 via `aioboto3` (`S3_ENDPOINT_URL` no R2; omitir na AWS) |
 
 Por que o projeto Python inteiro (e não só `app/`) fica em `backend/`: assim o backend é independente. `cd backend` e todos os comandos (`uv sync`, `uv run pytest`, `uv run alembic ...`) funcionam sem depender de arquivos da raiz, e o frontend terá a mesma independência com seu `package.json`.
 

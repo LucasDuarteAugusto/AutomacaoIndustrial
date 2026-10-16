@@ -5,6 +5,7 @@ import httpx
 import structlog
 from fastapi import FastAPI
 
+from app.armazenamento.factory import criar_armazenamento
 from app.catalogo.router import routers as catalogo_routers
 from app.core.config import Settings, get_settings
 from app.core.db import criar_engine, criar_sessionmaker
@@ -31,12 +32,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             app.state.http_client = cliente_http
             app.state.provedor_embedding = criar_provedor_embedding(settings, cliente_http)
             app.state.provedor_llm = criar_provedor_llm(settings, cliente_http)
+            app.state.armazenamento = criar_armazenamento(settings)
             log.info(
                 "app_iniciada",
                 ambiente=settings.ambiente,
                 embedding_modelo=settings.embedding_modelo,
                 embedding_dimensao=settings.embedding_dimensao,
                 llm_modelo=settings.llm_modelo,
+                armazenamento_tipo=settings.armazenamento_tipo,
             )
             yield
         await engine.dispose()

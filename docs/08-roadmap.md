@@ -17,9 +17,9 @@
   - LLM (fase 4): GPT-5 mini; modelos mais fortes sob demanda.
   - Reserva: Perplexity (texto) ou Gemini Embedding 2 (multimodal), se o teste com manuais reais pedir.
 - [x] Núcleo IA + `TRECHOS` (branch `feat/ingestao-busca`): Settings (Voyage/OpenAI), `ProvedorEmbedding` / `ProvedorLLM`, tabela `TRECHOS` com `vector(1024)`, HNSW e `tsvector`.
+- [x] Armazenamento de arquivos (`feat/armazenamento-local`): `ArmazenamentoLocal` padrão; adaptador S3-compatível pronto para Cloudflare R2 (e AWS S3 depois).
 - [ ] Validar recall@5 com 30 a 50 perguntas reais sobre 2 ou 3 manuais (antes de fechar o modelo em produção).
 - [ ] Descrição de figuras (diagramas, telas de IHM) por LLM com visão, indexada como trecho de texto.
-- [ ] Armazenamento de arquivos (pasta local, interface pronta para MinIO/S3).
 - [ ] `POST /v1/documentos/{id}/arquivo`: upload do PDF, cálculo de `HASH_SHA256`, `CHAVE_ARQUIVO`, `TAMANHO_BYTES`.
 - [ ] Processamento em segundo plano: extração de texto e tabelas, divisão em trechos por seção e tipo de conteúdo, geração de embeddings, atualização de `STATUS_PROCESSAMENTO`.
 - [ ] `POST /v1/busca`: busca híbrida (vetorial + textual) com filtros por fabricante, família, modelo, tipo de documento, idioma e firmware.

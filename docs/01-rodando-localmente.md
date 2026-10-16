@@ -68,14 +68,30 @@ Os arquivos `.env` não vão para o git; os `.env.example` são os modelos.
 
 ### `backend/.env` — lido por `backend/app/core/config.py` (`Settings`)
 
-| Variável | Padrão | Descrição |
-|---|---|---|
-| `AMBIENTE` | `local` | `local`, `teste` ou `producao` |
-| `LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
-| `LOG_JSON` | `false` | `true` emite logs em JSON (produção) |
-| `DATABASE_URL` | `postgresql+asyncpg://automacao:automacao@localhost:5433/automacao_industrial` | Usada pela API e pelo Alembic; usuário, senha, porta e banco devem bater com o `.env` da raiz |
+O modelo completo está em `backend/.env.example` (copie para `.env` e preencha as chaves vazias quando for usar cada serviço).
 
-Opcionais (têm padrão no código): `DB_POOL_SIZE` (5), `DB_MAX_OVERFLOW` (10), `DB_ECHO` (`false`; `true` imprime todo SQL executado).
+| Variável | Preencher agora? | Padrão / exemplo | Descrição |
+|---|---|---|---|
+| `AMBIENTE` | Sim | `local` | `local`, `teste` ou `producao` |
+| `LOG_LEVEL` | Sim | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `LOG_JSON` | Sim | `false` | `true` emite logs em JSON (produção) |
+| `DATABASE_URL` | Sim | `postgresql+asyncpg://automacao:automacao@localhost:5433/automacao_industrial` | API e Alembic; deve bater com o `.env` da raiz |
+| `ARMAZENAMENTO_TIPO` | Sim | `local` | `local` (disco) ou `s3` (R2 / AWS) |
+| `ARMAZENAMENTO_CAMINHO` | Sim (se local) | `data/arquivos` | Pasta dos PDFs; ver [10 — Armazenamento](10-armazenamento.md) |
+| `S3_ENDPOINT_URL` | Só se `s3` (R2) | *(vazio)* | Endpoint R2; omitir na AWS |
+| `S3_REGION` | Só se `s3` | `auto` | `auto` no R2; região AWS depois |
+| `S3_BUCKET` | Só se `s3` | *(vazio)* | Nome do bucket |
+| `S3_ACCESS_KEY_ID` | Só se `s3` | *(vazio)* | Access key |
+| `S3_SECRET_ACCESS_KEY` | Só se `s3` | *(vazio)* | Secret key |
+| `VOYAGE_API_KEY` | Na ingestão | *(vazio)* | Embedding `voyage-context-4` |
+| `VOYAGE_BASE_URL` | Opcional | `https://api.voyageai.com/v1` | |
+| `EMBEDDING_MODELO` | Opcional | `voyage-context-4` | |
+| `EMBEDDING_DIMENSAO` | Opcional | `1024` | Deve bater com `TRECHOS.EMBEDDING` |
+| `OPENAI_API_KEY` | No agente | *(vazio)* | LLM `gpt-5-mini` |
+| `OPENAI_BASE_URL` | Opcional | `https://api.openai.com/v1` | |
+| `LLM_MODELO` | Opcional | `gpt-5-mini` | |
+
+Opcionais de pool (padrão no código): `DB_POOL_SIZE` (5), `DB_MAX_OVERFLOW` (10), `DB_ECHO` (`false`).
 
 ## Comandos do dia a dia
 

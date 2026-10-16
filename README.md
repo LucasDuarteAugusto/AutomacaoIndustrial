@@ -43,6 +43,7 @@ Passo a passo completo e solução de problemas em [Rodando localmente](docs/01-
 | [07 — Domínio de acionamentos](docs/07-dominio-acionamentos.md) | Glossário técnico (SIMOCODE, soft starter, inversor) e como isso vira dado |
 | [08 — Roadmap](docs/08-roadmap.md) | Fases do projeto e próximos passos |
 | [09 — Estudo de modelos de IA](docs/09-estudo-modelos-ia.md) | Custo-benefício de modelos de embedding e LLM para a busca semântica e o agente |
+| [10 — Armazenamento](docs/10-armazenamento.md) | PDFs em disco (local) ou S3-compatível (Cloudflare R2 / AWS S3) |
 
 ## Estrutura do repositório
 
