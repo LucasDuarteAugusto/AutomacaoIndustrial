@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import ColumnElement, or_
+from sqlalchemy import ColumnElement, or_, select
 
 from app.catalogo.models import Equipamento, Familia
 from app.core.repository import RepositorioBase
@@ -9,6 +9,9 @@ from app.documentos.models import Documento, Idioma, TipoDocumento
 
 class DocumentoRepository(RepositorioBase[Documento]):
     modelo = Documento
+
+    async def obter_por_hash(self, hash_sha256: str) -> Documento | None:
+        return await self.session.scalar(select(Documento).where(Documento.hash_sha256 == hash_sha256))
 
     async def listar(
         self,

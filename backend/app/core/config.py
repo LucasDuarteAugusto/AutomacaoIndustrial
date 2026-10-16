@@ -49,6 +49,7 @@ class Settings(BaseSettings):
     # local = pasta no disco; s3 = API S3-compatível (Cloudflare R2 ou AWS S3)
     armazenamento_tipo: Literal["local", "s3"] = "local"
     armazenamento_caminho: str = "data/arquivos"
+    armazenamento_tamanho_max_bytes: int = Field(default=50 * 1024 * 1024, ge=1024)
     s3_endpoint_url: str | None = None  # R2: https://<accountid>.r2.cloudflarestorage.com; AWS: omitir
     s3_region: str = "auto"
     s3_bucket: str | None = None

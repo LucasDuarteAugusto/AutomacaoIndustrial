@@ -26,6 +26,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         engine = criar_engine(settings)
+        app.state.settings = settings
         app.state.engine = engine
         app.state.sessionmaker = criar_sessionmaker(engine)
         async with httpx.AsyncClient() as cliente_http:

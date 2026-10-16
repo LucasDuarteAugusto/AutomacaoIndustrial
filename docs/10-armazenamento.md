@@ -82,6 +82,16 @@ uv run pytest tests/armazenamento -q
 
 Local usa `tmp_path`; S3 usa mocks do cliente (sem rede / sem conta).
 
+## Upload HTTP
+
+`POST /v1/documentos/{id}/arquivo` (multipart, campo `arquivo`). Detalhes e códigos de erro em [05 — API](05-api.md).
+
+Fluxo: validar PDF → SHA-256 → `chave_documento` → `armazenamento.salvar` → atualizar `DOCUMENTOS`. Status permanece `PENDENTE` até o pipeline de trechos (próxima fatia).
+
+| Variável | Padrão | Uso |
+|---|---|---|
+| `ARMAZENAMENTO_TAMANHO_MAX_BYTES` | `52428800` (50 MiB) | Limite do corpo do upload |
+
 ## Próximo passo
 
-`POST /v1/documentos/{id}/arquivo`: multipart PDF → SHA-256 → `salvar` no armazenamento → atualizar `DOCUMENTOS` (`CHAVE_ARQUIVO`, `HASH_SHA256`, `TAMANHO_BYTES`, …) e disparar o pipeline de trechos.
+Pipeline: extrair texto do PDF → chunking → embeddings Voyage → gravar `TRECHOS` → `STATUS_PROCESSAMENTO=INDEXADO`.

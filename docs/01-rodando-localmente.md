@@ -78,6 +78,7 @@ O modelo completo está em `backend/.env.example` (copie para `.env` e preencha 
 | `DATABASE_URL` | Sim | `postgresql+asyncpg://automacao:automacao@localhost:5433/automacao_industrial` | API e Alembic; deve bater com o `.env` da raiz |
 | `ARMAZENAMENTO_TIPO` | Sim | `local` | `local` (disco) ou `s3` (R2 / AWS) |
 | `ARMAZENAMENTO_CAMINHO` | Sim (se local) | `data/arquivos` | Pasta dos PDFs; ver [10 — Armazenamento](10-armazenamento.md) |
+| `ARMAZENAMENTO_TAMANHO_MAX_BYTES` | Opcional | `52428800` | Limite do upload de PDF (50 MiB) |
 | `S3_ENDPOINT_URL` | Só se `s3` (R2) | *(vazio)* | Endpoint R2; omitir na AWS |
 | `S3_REGION` | Só se `s3` | `auto` | `auto` no R2; região AWS depois |
 | `S3_BUCKET` | Só se `s3` | *(vazio)* | Nome do bucket |

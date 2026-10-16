@@ -88,7 +88,27 @@ Corpo de criação: `titulo`, `tipo_documento`, `idioma`, `codigo_documento`, `e
 
 No `PATCH`, enviar `ids_familias` ou `ids_equipamentos` **substitui** a lista inteira.
 
-Campos preenchidos pelo sistema (fase 2, ingestão): `chave_arquivo`, `hash_sha256`, `tamanho_bytes`, `paginas`, `status_processamento`, `erro_processamento`.
+Campos de arquivo (ingestão): `chave_arquivo`, `hash_sha256`, `tamanho_bytes`, `paginas`, `status_processamento`, `erro_processamento`.
+
+#### Upload do PDF — `POST /v1/documentos/{id}/arquivo`
+
+`multipart/form-data` com o campo `arquivo` (PDF). Valida assinatura `%PDF-`, calcula SHA-256, grava no armazenamento e atualiza os metadados. Resposta `200` com `DocumentoOut`.
+
+| Situação | Status |
+|---|---|
+| PDF ok (novo ou mesma hash no mesmo documento) | 200 |
+| Documento inexistente | 404 |
+| Mesmo arquivo já ligado a **outro** documento | 409 |
+| Não é PDF / vazio / acima do limite | 422 |
+
+Limite: `ARMAZENAMENTO_TAMANHO_MAX_BYTES` (padrão 50 MiB). `paginas` continua `null` até o pipeline de trechos. Trocar o PDF (hash diferente) apaga o arquivo antigo e os `TRECHOS` do documento. Excluir o documento também remove o arquivo do armazenamento.
+
+```powershell
+$id = "<uuid-do-documento>"
+Invoke-RestMethod -Method Post "$api/v1/documentos/$id/arquivo" -Form @{
+  arquivo = Get-Item ".\manual.pdf"
+}
+```
 
 ## Exemplo completo
 

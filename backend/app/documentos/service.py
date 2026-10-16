@@ -1,16 +1,22 @@
 from collections.abc import Sequence
 from uuid import UUID
 
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.armazenamento.base import ArmazenamentoArquivos
+from app.armazenamento.chave import chave_documento
 from app.catalogo.models import Equipamento, Familia
 from app.catalogo.repository import EquipamentoRepository, FamiliaRepository
-from app.core.errors import NaoEncontrado, RegraNegocio
+from app.core.config import Settings
+from app.core.errors import Conflito, NaoEncontrado, RegraNegocio
 from app.core.schemas import Pagina
 from app.core.servicos import aplicar_alteracoes
-from app.documentos.models import Documento, Idioma, TipoDocumento
+from app.documentos.arquivo import hash_sha256, validar_pdf
+from app.documentos.models import Documento, Idioma, StatusProcessamento, TipoDocumento
 from app.documentos.repository import DocumentoRepository
 from app.documentos.schemas import DocumentoCreate, DocumentoOut, DocumentoUpdate
+from app.trechos.models import Trecho
 
 CAMPOS_VINCULO = {"ids_familias", "ids_equipamentos"}
 
@@ -20,8 +26,10 @@ def _sem_repetidos(ids: Sequence[UUID]) -> list[UUID]:
 
 
 class DocumentoService:
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: AsyncSession, armazenamento: ArmazenamentoArquivos, settings: Settings) -> None:
         self.session = session
+        self.armazenamento = armazenamento
+        self.settings = settings
         self.documentos = DocumentoRepository(session)
         self.familias = FamiliaRepository(session)
         self.equipamentos = EquipamentoRepository(session)
@@ -51,6 +59,13 @@ class DocumentoService:
         if fora:
             raise RegraNegocio(f"Equipamento(s) {', '.join(fora)} não pertencem às famílias vinculadas ao documento.")
         return equipamentos
+
+    async def _apagar_arquivo_se_houver(self, chave: str | None) -> None:
+        if chave:
+            await self.armazenamento.apagar(chave)
+
+    async def _limpar_trechos(self, id_documento: UUID) -> None:
+        await self.session.execute(delete(Trecho).where(Trecho.id_documento == id_documento))
 
     async def listar(
         self,
@@ -94,7 +109,42 @@ class DocumentoService:
         await self.session.commit()
         return DocumentoOut.model_validate(documento)
 
+    async def enviar_arquivo(self, id_documento: UUID, conteudo: bytes) -> DocumentoOut:
+        validar_pdf(conteudo, tamanho_max=self.settings.armazenamento_tamanho_max_bytes)
+        digest = hash_sha256(conteudo)
+        documento = await self._obter(id_documento)
+
+        if (
+            documento.hash_sha256 == digest
+            and documento.chave_arquivo
+            and await self.armazenamento.existe(documento.chave_arquivo)
+        ):
+            return DocumentoOut.model_validate(documento)
+
+        outro = await self.documentos.obter_por_hash(digest)
+        if outro is not None and outro.id_documento != id_documento:
+            raise Conflito(f"Já existe um documento com este arquivo (hash {digest[:12]}…).")
+
+        chave_antiga = documento.chave_arquivo
+        chave_nova = chave_documento(id_documento, digest)
+        await self.armazenamento.salvar(chave_nova, conteudo, content_type="application/pdf")
+
+        if chave_antiga and chave_antiga != chave_nova:
+            await self._apagar_arquivo_se_houver(chave_antiga)
+            await self._limpar_trechos(id_documento)
+
+        documento.chave_arquivo = chave_nova
+        documento.hash_sha256 = digest
+        documento.tamanho_bytes = len(conteudo)
+        documento.status_processamento = StatusProcessamento.PENDENTE
+        documento.erro_processamento = None
+        # paginas preenchidas na ingestão (pipeline de trechos)
+        await self.session.commit()
+        return DocumentoOut.model_validate(documento)
+
     async def excluir(self, id_documento: UUID) -> None:
         documento = await self._obter(id_documento)
+        chave = documento.chave_arquivo
         await self.documentos.remover(documento)
         await self.session.commit()
+        await self._apagar_arquivo_se_houver(chave)
