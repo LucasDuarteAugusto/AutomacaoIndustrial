@@ -43,7 +43,9 @@ tests/
   core/                        handlers de erro, migrations/pgvector
   health/                      /health e /ready
   auth/                        login, bootstrap, JWT, CORS, perfil LEITURA
-  agente/                      Q&A com LLM fake e citações
+  agente/                      Q&A com LLM fake, citações e lookup estruturado
+  parametros/                  CRUD de parâmetros
+  falhas/                      CRUD de falhas/alarmes
   catalogo/                    tipos, fabricantes, famílias, equipamentos
   documentos/                  documentos e vínculos
 ```

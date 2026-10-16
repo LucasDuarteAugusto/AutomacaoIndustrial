@@ -9,6 +9,9 @@ from polyfactory.factories.pydantic_factory import ModelFactory
 from app.catalogo.schemas import EquipamentoCreate, FabricanteCreate, FamiliaCreate
 from app.documentos.models import Idioma, TipoDocumento
 from app.documentos.schemas import DocumentoCreate
+from app.falhas.models import TipoFalha
+from app.falhas.schemas import FalhaCreate
+from app.parametros.schemas import ParametroCreate
 
 
 def _sufixo() -> str:
@@ -81,3 +84,22 @@ async def criar_documento(client: AsyncClient, **campos: Any) -> dict[str, Any]:
     campos.setdefault("ids_familias", [(await criar_familia(client))["id_familia"]])
     payload = DocumentoCreateFactory.build(**campos).model_dump(mode="json")
     return await _post(client, "/v1/documentos", payload)
+
+
+async def criar_parametro(client: AsyncClient, **campos: Any) -> dict[str, Any]:
+    campos.setdefault("id_familia", (await criar_familia(client))["id_familia"])
+    campos.setdefault("codigo", f"p{uuid4().hex[:4]}")
+    campos.setdefault("descricao", "Parâmetro de teste para comissionamento")
+    campos.setdefault("idioma", Idioma.PT_BR)
+    payload = ParametroCreate(**campos).model_dump(mode="json")
+    return await _post(client, "/v1/parametros", payload)
+
+
+async def criar_falha(client: AsyncClient, **campos: Any) -> dict[str, Any]:
+    campos.setdefault("id_familia", (await criar_familia(client))["id_familia"])
+    campos.setdefault("codigo", f"F{uuid4().hex[:5].upper()}")
+    campos.setdefault("tipo", TipoFalha.FALHA)
+    campos.setdefault("titulo", "Falha de teste")
+    campos.setdefault("idioma", Idioma.PT_BR)
+    payload = FalhaCreate(**campos).model_dump(mode="json")
+    return await _post(client, "/v1/falhas", payload)

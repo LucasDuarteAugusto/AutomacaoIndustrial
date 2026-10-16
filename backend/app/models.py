@@ -4,6 +4,8 @@ from app.auth.models import Usuario
 from app.catalogo.models import Equipamento, Fabricante, Familia, TipoEquipamento
 from app.core.db import Base
 from app.documentos.models import Documento, DocumentoEquipamento, DocumentoFamilia
+from app.falhas.models import Falha
+from app.parametros.models import Parametro
 from app.trechos.models import Trecho
 
 __all__ = [
@@ -13,7 +15,9 @@ __all__ = [
     "DocumentoFamilia",
     "Equipamento",
     "Fabricante",
+    "Falha",
     "Familia",
+    "Parametro",
     "TipoEquipamento",
     "Trecho",
     "Usuario",

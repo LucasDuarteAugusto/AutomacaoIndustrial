@@ -17,6 +17,11 @@ def test_formatar_trecho_inclui_indice_e_localizacao() -> None:
 
 
 def test_montar_mensagem_usuario_contem_pergunta_e_trechos() -> None:
-    msg = montar_mensagem_usuario(pergunta="tempo de rampa?", trechos_formatados="[1] trecho")
+    msg = montar_mensagem_usuario(
+        pergunta="tempo de rampa?",
+        estruturados_formatados="[P1] p1120",
+        trechos_formatados="[1] trecho",
+    )
     assert "tempo de rampa?" in msg
+    assert "[P1] p1120" in msg
     assert "[1] trecho" in msg

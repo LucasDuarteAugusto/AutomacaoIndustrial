@@ -26,14 +26,14 @@
 
 ### 3 — Dados estruturados
 
-- [ ] Tabela `PARAMETROS` (código, descrição, unidade, faixa, valor padrão, por família e firmware).
-- [ ] Tabela `FALHAS` (código, tipo falha/alarme, causa, solução).
+- [x] Tabela `PARAMETROS` + CRUD (`feat/parametros-falhas`); ver [15 — Parâmetros e falhas](15-parametros-falhas.md).
+- [x] Tabela `FALHAS` + CRUD (mesmo branch).
 - [ ] Extração assistida a partir das listas de parâmetros e de falhas.
 
 ### 4 — Agente de IA
 
 - [x] Endpoint de pergunta e resposta com citação das fontes (`feat/agente-qa`); ver [14 — Agente](14-agente.md). Usa busca híbrida como retriever.
-- [ ] Ferramentas do agente: consulta de parâmetro e de falha (depende da fase 3).
+- [x] Consulta de parâmetro e falha no agente (lookup por código na pergunta).
 - [ ] Histórico de conversas por usuário.
 
 ### 5 — Produção e clientes

@@ -4,6 +4,8 @@ from pydantic import Field
 
 from app.core.schemas import Entrada, Saida
 from app.documentos.models import Idioma, TipoDocumento
+from app.falhas.schemas import FalhaOut
+from app.parametros.schemas import ParametroOut
 
 
 class AgentePerguntaRequest(Entrada):
@@ -38,5 +40,7 @@ class AgenteRespostaOut(Saida):
     pergunta: str
     resposta: str
     citacoes: list[CitacaoOut]
+    parametros: list[ParametroOut] = Field(default_factory=list)
+    falhas: list[FalhaOut] = Field(default_factory=list)
     modelo_llm: str
     trechos_consultados: int

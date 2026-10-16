@@ -6,10 +6,11 @@ Endpoint `POST /v1/agente/perguntar`: recupera trechos com a **busca híbrida** 
 
 ```text
 pergunta (+ filtros opcionais)
+  → extrai códigos (p1120, F07801, …) → consulta PARAMETROS / FALHAS
   → BuscaService (vetor + tsvector + RRF)
-  → se não houver trechos: resposta fixa sem chamar o LLM
-  → senão: prompt com trechos [1]…[N] → ProvedorLLM.completar
-  → resposta + lista de citações (documento, página, seção, trecho)
+  → se não houver trechos nem registros: resposta fixa sem chamar o LLM
+  → senão: prompt com [P#]/[F#] + trechos [1]…[N] → ProvedorLLM.completar
+  → resposta + citações + listas `parametros` / `falhas`
 ```
 
 ## Entrada
@@ -35,6 +36,7 @@ pergunta (+ filtros opcionais)
 |---|---|
 | `resposta` | Texto gerado (ou aviso se não houver trechos) |
 | `citacoes` | Fontes `[1]…[N]` com `id_documento`, `titulo_documento`, `pagina`, `secao`, `trecho`, `score` |
+| `parametros` / `falhas` | Hits estruturados quando a pergunta cita códigos conhecidos |
 | `modelo_llm` | Modelo usado (`gpt-5-mini` em produção; `fake-llm` nos testes) |
 | `trechos_consultados` | Quantidade enviada ao LLM |
 
@@ -56,10 +58,10 @@ Exige Bearer (`exigir_usuario`). Perfil `LEITURA` pode perguntar (somente leitur
 
 ## Ainda não nesta entrega
 
-- Ferramentas de `PARAMETROS` / `FALHAS` (fase 3).
 - Histórico de conversas por usuário.
 - Streaming da resposta.
+- Extração em lote a partir de PDFs de lista de parâmetros/falhas.
 
 ## Próximo passo
 
-Dados estruturados (`PARAMETROS` / `FALHAS`) para o agente consultar códigos com precisão; depois Docker/CI.
+Docker/CI; histórico de conversas; clientes.

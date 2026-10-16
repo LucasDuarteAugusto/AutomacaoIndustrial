@@ -283,9 +283,13 @@ Contas da API (JWT). Migration `cria_usuarios`. Detalhes de fluxo: [13 — Auth]
 | `PERFIL` | VARCHAR + CHECK | `ADMIN`, `OPERADOR`, `LEITURA` |
 | `ATIVO` | BOOLEAN | Inativo não autentica |
 
-## Próximas tabelas (planejadas)
+## Tabelas `PARAMETROS` e `FALHAS`
 
-| Tabela | Fase | Conteúdo |
-|---|---|---|
-| `PARAMETROS` | 3 | Parâmetros estruturados por família/firmware (código, descrição, unidade, faixa, padrão) |
-| `FALHAS` | 3 | Códigos de falha/alarme com causa e solução |
+Dados estruturados de comissionamento (migration `cria_parametros_e_falhas`). Detalhes de API: [15 — Parâmetros e falhas](15-parametros-falhas.md).
+
+| Tabela | Conteúdo |
+|---|---|
+| `PARAMETROS` | Código, descrição, unidade, faixa, padrão; por família/firmware/idioma |
+| `FALHAS` | Código, tipo FALHA/ALARME, título, causa, solução; por família/firmware/idioma |
+
+FK `ID_FAMILIA` RESTRICT; `ID_DOCUMENTO` SET NULL. Índice único de escopo com `COALESCE(VERSAO_FIRMWARE, '')`.

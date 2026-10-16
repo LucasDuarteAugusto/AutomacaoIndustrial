@@ -16,10 +16,12 @@ from app.core.db import criar_engine, criar_sessionmaker
 from app.core.handlers import registrar_handlers
 from app.core.logging import configurar_logging
 from app.documentos.router import router as documentos_router
+from app.falhas.router import router as falhas_router
 from app.health.router import router as health_router
 from app.ia.embedding import criar_provedor_embedding
 from app.ia.fake import EmbeddingFake, LLMFake
 from app.ia.llm import criar_provedor_llm
+from app.parametros.router import router as parametros_router
 
 log = structlog.get_logger()
 
@@ -66,6 +68,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     registrar_handlers(app)
     app.include_router(health_router)
     app.include_router(auth_router)
-    for router in (*catalogo_routers, documentos_router, busca_router, agente_router):
+    for router in (
+        *catalogo_routers,
+        documentos_router,
+        parametros_router,
+        falhas_router,
+        busca_router,
+        agente_router,
+    ):
         app.include_router(router)
     return app

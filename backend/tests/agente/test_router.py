@@ -3,7 +3,7 @@ from uuid import UUID
 import fitz
 from httpx import AsyncClient
 
-from tests.factories import criar_documento
+from tests.factories import criar_documento, criar_falha, criar_familia, criar_parametro
 
 
 def _pdf(texto: str) -> bytes:
@@ -64,6 +64,8 @@ async def test_agente_sem_trechos_nao_chama_llm_com_alucinacao(client: AsyncClie
     assert resp.status_code == 200, resp.text
     corpo = resp.json()
     assert corpo["citacoes"] == []
+    assert corpo["parametros"] == []
+    assert corpo["falhas"] == []
     assert corpo["trechos_consultados"] == 0
     assert "não encontrei" in corpo["resposta"].lower()
 
@@ -76,3 +78,51 @@ async def test_agente_pergunta_vazia_retorna_422(client: AsyncClient) -> None:
 async def test_agente_exige_autenticacao(client_sem_auth: AsyncClient) -> None:
     resp = await client_sem_auth.post("/v1/agente/perguntar", json={"pergunta": "o que é p1120?"})
     assert resp.status_code == 401
+
+
+async def test_agente_usa_parametro_estruturado_sem_trecho(client: AsyncClient) -> None:
+    familia = await criar_familia(client)
+    await criar_parametro(
+        client,
+        id_familia=familia["id_familia"],
+        codigo="p1120",
+        descricao="Tempo de rampa de aceleração em segundos",
+        unidade="s",
+        valor_padrao="10",
+    )
+
+    resp = await client.post(
+        "/v1/agente/perguntar",
+        json={
+            "pergunta": "O que significa o parâmetro p1120?",
+            "id_familia": familia["id_familia"],
+            "limit": 5,
+        },
+    )
+    assert resp.status_code == 200, resp.text
+    corpo = resp.json()
+    assert corpo["trechos_consultados"] == 0
+    assert len(corpo["parametros"]) == 1
+    assert corpo["parametros"][0]["codigo"].lower() == "p1120"
+    assert corpo["resposta"]
+
+
+async def test_agente_usa_falha_estruturada(client: AsyncClient) -> None:
+    familia = await criar_familia(client)
+    await criar_falha(
+        client,
+        id_familia=familia["id_familia"],
+        codigo="F07801",
+        titulo="Sobrecorrente",
+        causa="Carga excessiva",
+        solucao="Verificar motor",
+    )
+
+    resp = await client.post(
+        "/v1/agente/perguntar",
+        json={"pergunta": "O que é F07801?", "id_familia": familia["id_familia"]},
+    )
+    assert resp.status_code == 200, resp.text
+    corpo = resp.json()
+    assert len(corpo["falhas"]) == 1
+    assert corpo["falhas"][0]["codigo"].upper() == "F07801"

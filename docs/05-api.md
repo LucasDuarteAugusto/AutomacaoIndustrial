@@ -58,9 +58,17 @@ Rotas `/v1/...` exigem `Authorization: Bearer <token>`, exceto `POST /v1/auth/lo
 
 | Rota | Descrição |
 |---|---|
-| `POST /perguntar` | Q&A com busca híbrida + LLM e citações (documento, página, seção) |
+| `POST /perguntar` | Q&A com busca híbrida + LLM, citações e lookup de parâmetros/falhas |
 
 Detalhes: [14 — Agente](14-agente.md).
+
+### Parâmetros — `/v1/parametros`
+
+CRUD de parâmetros estruturados (código, faixa, unidade, …). Filtros: `id_familia`, `codigo`, `versao_firmware`, `idioma`, `busca`, `ativo`. Ver [15](15-parametros-falhas.md).
+
+### Falhas — `/v1/falhas`
+
+CRUD de falhas/alarmes (causa, solução, …). Filtros: `id_familia`, `codigo`, `tipo`, `versao_firmware`, `idioma`, `busca`, `ativo`.
 
 ### Tipos de equipamento — `/v1/tipos-equipamento`
 
