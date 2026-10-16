@@ -81,9 +81,17 @@ erDiagram
         vector EMBEDDING
         tsvector CONTEUDO_BUSCA
     }
+    USUARIOS {
+        uuid ID_USUARIO PK
+        varchar EMAIL UK
+        varchar SENHA_HASH
+        varchar NOME
+        varchar PERFIL
+        boolean ATIVO
+    }
 ```
 
-Todas as tabelas também têm `createdAt` e `updatedAt` (omitidos no diagrama).
+Todas as tabelas também têm `createdAt` e `updatedAt` (omitidos no diagrama). `USUARIOS` é independente do catálogo (auth JWT — ver [13 — Auth](13-auth.md)).
 
 ## Como ler o modelo
 
@@ -261,6 +269,19 @@ Pedaços indexáveis de um documento (fase 2). Migration `cria_trechos`.
 | `CONTEUDO_BUSCA` | `tsvector` | Busca textual; índice GIN |
 
 A dimensão do vetor está fixada em **1024** (abaixo do limite de 2.000 do HNSW no tipo `vector`). Trocar o modelo ou a dimensão exige reprocessar os trechos. Decisão e alternativas: [09 — Estudo de modelos de IA](09-estudo-modelos-ia.md).
+
+## Tabela `USUARIOS`
+
+Contas da API (JWT). Migration `cria_usuarios`. Detalhes de fluxo: [13 — Auth](13-auth.md).
+
+| Coluna | Tipo | Notas |
+|---|---|---|
+| `ID_USUARIO` | UUID PK | `gen_random_uuid()` |
+| `EMAIL` | VARCHAR(255) UK | Login (único) |
+| `SENHA_HASH` | VARCHAR(255) | Argon2 via pwdlib |
+| `NOME` | VARCHAR(150) | Exibição |
+| `PERFIL` | VARCHAR + CHECK | `ADMIN`, `OPERADOR`, `LEITURA` |
+| `ATIVO` | BOOLEAN | Inativo não autentica |
 
 ## Próximas tabelas (planejadas)
 

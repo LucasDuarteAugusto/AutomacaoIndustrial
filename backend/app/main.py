@@ -4,8 +4,10 @@ from contextlib import asynccontextmanager
 import httpx
 import structlog
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.armazenamento.factory import criar_armazenamento
+from app.auth.router import router as auth_router
 from app.busca.router import router as busca_router
 from app.catalogo.router import routers as catalogo_routers
 from app.core.config import Settings, get_settings
@@ -52,8 +54,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         log.info("app_encerrada")
 
     app = FastAPI(title=settings.nome_app, version="0.1.0", lifespan=lifespan)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins_lista,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     registrar_handlers(app)
     app.include_router(health_router)
+    app.include_router(auth_router)
     for router in (*catalogo_routers, documentos_router, busca_router):
         app.include_router(router)
     return app

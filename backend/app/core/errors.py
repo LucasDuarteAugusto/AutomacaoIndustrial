@@ -8,6 +8,16 @@ class ErroDominio(Exception):
         self.detalhe = detalhe
 
 
+class NaoAutorizado(ErroDominio):
+    status = 401
+    titulo = "Não autorizado"
+
+
+class Proibido(ErroDominio):
+    status = 403
+    titulo = "Proibido"
+
+
 class NaoEncontrado(ErroDominio):
     status = 404
     titulo = "Recurso não encontrado"

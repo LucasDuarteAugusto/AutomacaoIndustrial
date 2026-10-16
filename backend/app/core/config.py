@@ -60,6 +60,16 @@ class Settings(BaseSettings):
     s3_access_key_id: SecretStr | None = None
     s3_secret_access_key: SecretStr | None = None
 
+    jwt_secret: SecretStr = SecretStr("altere-este-segredo-em-producao-32b")
+    jwt_algorithm: str = "HS256"
+    jwt_expiracao_minutos: int = Field(default=480, ge=5, le=60 * 24 * 30)
+    # Lista separada por vírgula; use * para refletir qualquer origem (só em local)
+    cors_origins: str = "http://localhost:5173,http://localhost:3000"
+
+    @property
+    def cors_origins_lista(self) -> list[str]:
+        return [origem.strip() for origem in self.cors_origins.split(",") if origem.strip()]
+
     @field_validator(*sorted(_CAMPOS_VAZIOS_COMO_NONE), mode="before")
     @classmethod
     def _vazio_vira_none(cls, valor: object) -> object:

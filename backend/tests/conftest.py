@@ -9,6 +9,8 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from testcontainers.community.postgres import PostgresContainer
 
+from app.auth.deps import get_usuario_atual, usuario_para_teste
+from app.auth.models import Perfil
 from app.core.config import Settings
 from app.core.db import get_session
 from app.main import create_app
@@ -63,7 +65,40 @@ async def client(app: FastAPI, db_session: AsyncSession) -> AsyncIterator[AsyncC
     async def _session_de_teste() -> AsyncIterator[AsyncSession]:
         yield db_session
 
+    async def _usuario_admin() -> object:
+        return usuario_para_teste(Perfil.ADMIN)
+
     app.dependency_overrides[get_session] = _session_de_teste
+    app.dependency_overrides[get_usuario_atual] = _usuario_admin
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as cliente:
+        yield cliente
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+async def client_sem_auth(app: FastAPI, db_session: AsyncSession) -> AsyncIterator[AsyncClient]:
+    """Cliente sem override de usuário — exige Bearer real."""
+
+    async def _session_de_teste() -> AsyncIterator[AsyncSession]:
+        yield db_session
+
+    app.dependency_overrides[get_session] = _session_de_teste
+    app.dependency_overrides.pop(get_usuario_atual, None)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as cliente:
+        yield cliente
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+async def client_leitura(app: FastAPI, db_session: AsyncSession) -> AsyncIterator[AsyncClient]:
+    async def _session_de_teste() -> AsyncIterator[AsyncSession]:
+        yield db_session
+
+    async def _usuario_leitura() -> object:
+        return usuario_para_teste(Perfil.LEITURA)
+
+    app.dependency_overrides[get_session] = _session_de_teste
+    app.dependency_overrides[get_usuario_atual] = _usuario_leitura
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as cliente:
         yield cliente
     app.dependency_overrides.clear()

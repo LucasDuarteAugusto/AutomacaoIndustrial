@@ -1,8 +1,9 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, File, Query, Request, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Query, Request, UploadFile, status
 
+from app.auth.deps import exigir_operacao_escrita, exigir_usuario
 from app.core.config import Settings
 from app.core.deps import SettingsDep
 from app.core.errors import RegraNegocio
@@ -13,7 +14,10 @@ from app.documentos.models import Idioma, TipoDocumento
 from app.documentos.schemas import DocumentoCreate, DocumentoOut, DocumentoUpdate
 from app.documentos.service import DocumentoService
 
-router = APIRouter(prefix="/v1/documentos", tags=["documentos"])
+_auth = [Depends(exigir_usuario)]
+_escrita = [Depends(exigir_operacao_escrita)]
+
+router = APIRouter(prefix="/v1/documentos", tags=["documentos"], dependencies=_auth)
 
 
 async def _disparar_ingestao(
@@ -49,12 +53,12 @@ async def obter_documento(id_documento: UUID, service: DocumentoServiceDep) -> D
     return await service.obter(id_documento)
 
 
-@router.post("", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED, dependencies=_escrita)
 async def criar_documento(dados: DocumentoCreate, service: DocumentoServiceDep) -> DocumentoOut:
     return await service.criar(dados)
 
 
-@router.post("/{id_documento}/arquivo")
+@router.post("/{id_documento}/arquivo", dependencies=_escrita)
 async def enviar_arquivo_documento(
     id_documento: UUID,
     service: DocumentoServiceDep,
@@ -81,7 +85,7 @@ async def enviar_arquivo_documento(
     return resultado.documento
 
 
-@router.post("/{id_documento}/reprocessar")
+@router.post("/{id_documento}/reprocessar", dependencies=_escrita)
 async def reprocessar_documento(
     id_documento: UUID,
     service: DocumentoServiceDep,
@@ -102,11 +106,11 @@ async def reprocessar_documento(
     return await service.obter(id_documento)
 
 
-@router.patch("/{id_documento}")
+@router.patch("/{id_documento}", dependencies=_escrita)
 async def alterar_documento(id_documento: UUID, dados: DocumentoUpdate, service: DocumentoServiceDep) -> DocumentoOut:
     return await service.alterar(id_documento, dados)
 
 
-@router.delete("/{id_documento}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{id_documento}", status_code=status.HTTP_204_NO_CONTENT, dependencies=_escrita)
 async def excluir_documento(id_documento: UUID, service: DocumentoServiceDep) -> None:
     await service.excluir(id_documento)

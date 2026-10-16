@@ -1,8 +1,9 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, Depends, Query, status
 
+from app.auth.deps import exigir_operacao_escrita, exigir_usuario
 from app.catalogo.deps import (
     EquipamentoServiceDep,
     FabricanteServiceDep,
@@ -25,11 +26,13 @@ from app.core.schemas import Pagina, PaginacaoDep
 
 Busca = Annotated[str | None, Query(max_length=100, description="Texto contido no nome")]
 Ativo = Annotated[bool | None, Query(description="Filtra por ativo/inativo")]
+_auth = [Depends(exigir_usuario)]
+_escrita = [Depends(exigir_operacao_escrita)]
 
-tipos_router = APIRouter(prefix="/v1/tipos-equipamento", tags=["tipos-equipamento"])
-fabricantes_router = APIRouter(prefix="/v1/fabricantes", tags=["fabricantes"])
-familias_router = APIRouter(prefix="/v1/familias", tags=["familias"])
-equipamentos_router = APIRouter(prefix="/v1/equipamentos", tags=["equipamentos"])
+tipos_router = APIRouter(prefix="/v1/tipos-equipamento", tags=["tipos-equipamento"], dependencies=_auth)
+fabricantes_router = APIRouter(prefix="/v1/fabricantes", tags=["fabricantes"], dependencies=_auth)
+familias_router = APIRouter(prefix="/v1/familias", tags=["familias"], dependencies=_auth)
+equipamentos_router = APIRouter(prefix="/v1/equipamentos", tags=["equipamentos"], dependencies=_auth)
 
 
 @tipos_router.get("")
@@ -54,19 +57,19 @@ async def obter_fabricante(id_fabricante: UUID, service: FabricanteServiceDep) -
     return await service.obter(id_fabricante)
 
 
-@fabricantes_router.post("", status_code=status.HTTP_201_CREATED)
+@fabricantes_router.post("", status_code=status.HTTP_201_CREATED, dependencies=_escrita)
 async def criar_fabricante(dados: FabricanteCreate, service: FabricanteServiceDep) -> FabricanteOut:
     return await service.criar(dados)
 
 
-@fabricantes_router.patch("/{id_fabricante}")
+@fabricantes_router.patch("/{id_fabricante}", dependencies=_escrita)
 async def alterar_fabricante(
     id_fabricante: UUID, dados: FabricanteUpdate, service: FabricanteServiceDep
 ) -> FabricanteOut:
     return await service.alterar(id_fabricante, dados)
 
 
-@fabricantes_router.delete("/{id_fabricante}", status_code=status.HTTP_204_NO_CONTENT)
+@fabricantes_router.delete("/{id_fabricante}", status_code=status.HTTP_204_NO_CONTENT, dependencies=_escrita)
 async def excluir_fabricante(id_fabricante: UUID, service: FabricanteServiceDep) -> None:
     await service.excluir(id_fabricante)
 
@@ -88,17 +91,17 @@ async def obter_familia(id_familia: UUID, service: FamiliaServiceDep) -> Familia
     return await service.obter(id_familia)
 
 
-@familias_router.post("", status_code=status.HTTP_201_CREATED)
+@familias_router.post("", status_code=status.HTTP_201_CREATED, dependencies=_escrita)
 async def criar_familia(dados: FamiliaCreate, service: FamiliaServiceDep) -> FamiliaOut:
     return await service.criar(dados)
 
 
-@familias_router.patch("/{id_familia}")
+@familias_router.patch("/{id_familia}", dependencies=_escrita)
 async def alterar_familia(id_familia: UUID, dados: FamiliaUpdate, service: FamiliaServiceDep) -> FamiliaOut:
     return await service.alterar(id_familia, dados)
 
 
-@familias_router.delete("/{id_familia}", status_code=status.HTTP_204_NO_CONTENT)
+@familias_router.delete("/{id_familia}", status_code=status.HTTP_204_NO_CONTENT, dependencies=_escrita)
 async def excluir_familia(id_familia: UUID, service: FamiliaServiceDep) -> None:
     await service.excluir(id_familia)
 
@@ -119,19 +122,19 @@ async def obter_equipamento(id_equipamento: UUID, service: EquipamentoServiceDep
     return await service.obter(id_equipamento)
 
 
-@equipamentos_router.post("", status_code=status.HTTP_201_CREATED)
+@equipamentos_router.post("", status_code=status.HTTP_201_CREATED, dependencies=_escrita)
 async def criar_equipamento(dados: EquipamentoCreate, service: EquipamentoServiceDep) -> EquipamentoOut:
     return await service.criar(dados)
 
 
-@equipamentos_router.patch("/{id_equipamento}")
+@equipamentos_router.patch("/{id_equipamento}", dependencies=_escrita)
 async def alterar_equipamento(
     id_equipamento: UUID, dados: EquipamentoUpdate, service: EquipamentoServiceDep
 ) -> EquipamentoOut:
     return await service.alterar(id_equipamento, dados)
 
 
-@equipamentos_router.delete("/{id_equipamento}", status_code=status.HTTP_204_NO_CONTENT)
+@equipamentos_router.delete("/{id_equipamento}", status_code=status.HTTP_204_NO_CONTENT, dependencies=_escrita)
 async def excluir_equipamento(id_equipamento: UUID, service: EquipamentoServiceDep) -> None:
     await service.excluir(id_equipamento)
 

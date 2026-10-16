@@ -1,9 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from app.auth.deps import exigir_usuario
 from app.busca.deps import BuscaServiceDep
 from app.busca.schemas import BuscaOut, BuscaRequest
 
-router = APIRouter(prefix="/v1/busca", tags=["busca"])
+router = APIRouter(prefix="/v1/busca", tags=["busca"], dependencies=[Depends(exigir_usuario)])
 
 
 @router.post("")

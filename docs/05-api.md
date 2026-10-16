@@ -32,6 +32,10 @@ Toda listagem aceita `limit` (1–100, padrão 20) e `offset` (padrão 0) e resp
 
 `total` é a quantidade total que atende aos filtros (não só a página). Página 3 com 20 itens: `?limit=20&offset=40`.
 
+## Autenticação
+
+Rotas `/v1/...` exigem `Authorization: Bearer <token>`, exceto `POST /v1/auth/login` e `POST /v1/auth/bootstrap`. Detalhes e perfis: [13 — Auth](13-auth.md).
+
 ## Rotas
 
 ### Health
@@ -40,6 +44,15 @@ Toda listagem aceita `limit` (1–100, padrão 20) e `offset` (padrão 0) e resp
 |---|---|
 | `GET /health` | `{"status": "ok"}` se o processo está vivo |
 | `GET /ready` | `{"status": "ok"}` se o banco responde; 503 caso contrário |
+
+### Auth — `/v1/auth`
+
+| Rota | Descrição |
+|---|---|
+| `POST /bootstrap` | Primeiro ADMIN (só com base vazia) |
+| `POST /login` | E-mail + senha → JWT |
+| `GET /me` | Usuário do token |
+| `POST /usuarios`, `PATCH /usuarios/{id}` | CRUD de usuários (`ADMIN`) |
 
 ### Tipos de equipamento — `/v1/tipos-equipamento`
 

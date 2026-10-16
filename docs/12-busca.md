@@ -44,4 +44,4 @@ Lista de trechos com `score` (RRF), `distancia_cosseno` (menor = mais próximo),
 
 ## Próximo passo
 
-JWT + CORS; depois agente Q&A usando esta busca.
+Auth: [13 — Autenticação](13-auth.md). Em seguida: agente Q&A usando esta busca.

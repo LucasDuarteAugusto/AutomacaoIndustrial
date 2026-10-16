@@ -21,7 +21,7 @@ pytest inicia
        └─ app (sessão): create_app(settings de teste) + lifespan (abre o engine)
             └─ db_session (por teste): abre transação
                  └─ client (por teste): httpx.AsyncClient chamando a app em memória,
-                                        com get_session substituída por db_session
+                                        com get_session e get_usuario_atual substituídos
             fim do teste: rollback (nada persiste)
 ```
 
@@ -30,6 +30,7 @@ Pontos importantes:
 - **Banco real, não simulado.** Mesma imagem do `docker-compose.yml`. Constraints, `CHECK`, FKs e pgvector se comportam como em produção. SQLite e mock de `AsyncSession` são proibidos no projeto.
 - **Migrations testadas a cada execução.** O banco de teste é criado pelo `alembic upgrade head`; uma migration quebrada derruba a suíte.
 - **Isolamento por transação.** Cada teste roda dentro de uma transação desfeita no final. O `commit` do service vira um savepoint (`join_transaction_mode="create_savepoint"`). Nenhum teste precisa limpar tabelas.
+- **Auth nos testes.** O `client` padrão sobrescreve `get_usuario_atual` com um ADMIN sintético. Use `client_sem_auth` (Bearer real) ou `client_leitura` quando o teste for de autenticação/perfil.
 - **Sem rede.** O `AsyncClient` usa `ASGITransport` e chama a aplicação diretamente.
 - **Assíncrono automático.** `asyncio_mode = "auto"` no `pyproject.toml`: não precisa de `@pytest.mark.asyncio`.
 
@@ -37,10 +38,11 @@ Pontos importantes:
 
 ```text
 tests/
-  conftest.py                  fixtures: database_url, settings, app, db_session, client
+  conftest.py                  fixtures: database_url, settings, app, db_session, client, client_sem_auth, client_leitura
   factories.py                 factories (polyfactory) + helpers criar_fabricante/familia/equipamento/documento
   core/                        handlers de erro, migrations/pgvector
   health/                      /health e /ready
+  auth/                        login, bootstrap, JWT, CORS, perfil LEITURA
   catalogo/                    tipos, fabricantes, famílias, equipamentos
   documentos/                  documentos e vínculos
 ```

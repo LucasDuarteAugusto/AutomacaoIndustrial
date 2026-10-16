@@ -38,8 +38,8 @@
 
 ### 5 — Produção e clientes
 
-- [ ] Autenticação JWT (pyjwt + pwdlib/argon2) e perfis de acesso.
-- [ ] CORS para o frontend React.
+- [x] Autenticação JWT (pyjwt + pwdlib/argon2) e perfis (`feat/auth-jwt-cors`); ver [13 — Auth](13-auth.md).
+- [x] CORS para o frontend React.
 - [ ] `Dockerfile` da API e pipeline de CI (ruff, mypy, pytest).
 - [ ] Deploy (banco gerenciado com pgvector + container da API).
 - [ ] Frontend React e aplicativo Android consumindo o OpenAPI.
