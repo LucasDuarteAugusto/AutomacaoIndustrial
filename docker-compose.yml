@@ -18,5 +18,44 @@ services:
       timeout: 3s
       retries: 10
 
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: automacao-industrial-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      AMBIENTE: ${AMBIENTE:-local}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_JSON: ${LOG_JSON:-false}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-automacao}:${POSTGRES_PASSWORD:-automacao}@db:5432/${POSTGRES_DB:-automacao_industrial}
+      ARMAZENAMENTO_TIPO: ${ARMAZENAMENTO_TIPO:-local}
+      ARMAZENAMENTO_CAMINHO: /data/arquivos
+      JWT_SECRET: ${JWT_SECRET:-altere-este-segredo-em-producao-32b}
+      JWT_EXPIRACAO_MINUTOS: ${JWT_EXPIRACAO_MINUTOS:-480}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
+      VOYAGE_API_KEY: ${VOYAGE_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - api_arquivos:/data/arquivos
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
 volumes:
   db_data:
+  api_arquivos:

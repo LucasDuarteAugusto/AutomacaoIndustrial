@@ -15,16 +15,18 @@ Não use `pip install` nem ative a venv manualmente: tudo roda via `uv run`.
 
 ```text
 AutomacaoIndustrial/
-├── docker-compose.yml   infraestrutura compartilhada (Postgres)   → comandos docker na RAIZ
+├── docker-compose.yml   Postgres + API (opcional)                 → comandos docker na RAIZ
 ├── .env                 variáveis do docker-compose
+├── .github/workflows/   CI (ruff, mypy, pytest, build Docker)
 ├── docs/
 └── backend/             projeto Python (FastAPI)                   → comandos uv na pasta backend/
+    ├── Dockerfile       imagem da API
     ├── .env             variáveis da aplicação (DATABASE_URL…)
     ├── pyproject.toml, uv.lock, alembic.ini
     ├── app/  migrations/  tests/
 ```
 
-Regra prática: **`docker compose` na raiz, `uv run` dentro de `backend/`.**
+Regra prática: **`docker compose` na raiz, `uv run` dentro de `backend/`.** Detalhes da imagem e do CI: [16 — Docker e CI](16-docker-ci.md).
 
 ## Primeira execução
 
@@ -103,11 +105,14 @@ Opcionais de pool (padrão no código): `DB_POOL_SIZE` (5), `DB_MAX_OVERFLOW` (1
 Na **raiz**:
 
 ```powershell
-docker compose up -d --wait          # sobe o banco
+docker compose up -d --wait          # sobe só o que já estava (ex.: db)
+docker compose up -d db --wait       # só o Postgres (dev com uvicorn local)
+docker compose up -d --build --wait  # Postgres + API (imagem)
 docker compose stop                  # para (mantém os dados)
-docker compose down                  # remove o container (mantém os dados no volume)
-docker compose down -v               # remove container E dados (zera o banco)
-docker compose logs -f db            # acompanha logs do Postgres
+docker compose down                  # remove containers (mantém volumes)
+docker compose down -v               # remove containers E volumes (zera o banco)
+docker compose logs -f db            # logs do Postgres
+docker compose logs -f api           # logs da API
 
 # psql dentro do container
 docker exec -it automacao-industrial-db psql -U automacao -d automacao_industrial

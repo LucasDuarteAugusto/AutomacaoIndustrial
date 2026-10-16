@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [development, main, master]
+  pull_request:
+    branches: [development, main, master]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Ruff + Mypy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.14"
+
+      - name: Instalar dependências
+        run: uv sync --frozen --group dev
+
+      - name: Ruff format
+        run: uv run ruff format --check .
+
+      - name: Ruff check
+        run: uv run ruff check .
+
+      - name: Mypy
+        run: uv run mypy
+
+  test:
+    name: Pytest
+    runs-on: ubuntu-latest
+    needs: quality
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.14"
+
+      - name: Instalar dependências
+        run: uv sync --frozen --group dev
+
+      - name: Pytest (testcontainers + pgvector)
+        run: uv run pytest -q --tb=short
+
+  docker:
+    name: Build imagem API
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Dockerfile
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: backend/Dockerfile
+          push: false
+          tags: automacao-industrial-api:ci

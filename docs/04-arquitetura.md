@@ -47,11 +47,12 @@ O repositório é um **monorepo**: cada aplicação fica em sua pasta, autoconti
 AutomacaoIndustrial/
   README.md               página inicial (links para docs/)
   docs/                   documentação do projeto todo
-  docker-compose.yml      infraestrutura compartilhada (Postgres)
+  docker-compose.yml      Postgres + API (build do Dockerfile)
   .env.example            variáveis do docker-compose
+  .github/workflows/      CI (ruff, mypy, pytest, build da imagem)
   .pre-commit-config.yaml hooks de qualidade para todo o repositório
   .cursor/                regras, hooks e skills do assistente de IA
-  backend/                API FastAPI (projeto Python)
+  backend/                API FastAPI (projeto Python + Dockerfile)
   frontend/               (futuro) React
   mobile/                 (futuro) Android
 ```

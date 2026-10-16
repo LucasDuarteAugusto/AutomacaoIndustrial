@@ -49,6 +49,7 @@ Passo a passo completo e solução de problemas em [Rodando localmente](docs/01-
 | [13 — Auth](docs/13-auth.md) | JWT (perfis ADMIN/OPERADOR/LEITURA) e CORS |
 | [14 — Agente](docs/14-agente.md) | Q&A com busca híbrida, LLM e citações |
 | [15 — Parâmetros e falhas](docs/15-parametros-falhas.md) | Tabelas estruturadas + lookup no agente |
+| [16 — Docker e CI](docs/16-docker-ci.md) | Imagem da API, Compose e GitHub Actions |
 
 ## Estrutura do repositório
 
@@ -56,10 +57,12 @@ Passo a passo completo e solução de problemas em [Rodando localmente](docs/01-
 AutomacaoIndustrial/
 ├── backend/             API FastAPI (Python 3.14, SQLAlchemy async, Alembic)
 │   ├── app/             código: core/, auth/, catalogo/, documentos/, parametros/, falhas/, busca/, agente/, health/
+│   ├── Dockerfile       imagem de produção/local via Compose
 │   ├── migrations/      versões do schema
 │   └── tests/           testes contra PostgreSQL real (testcontainers)
 ├── docs/                documentação
-├── docker-compose.yml   PostgreSQL 17 + pgvector
+├── docker-compose.yml   PostgreSQL 17 + pgvector (+ serviço api)
+├── .github/workflows/   CI (ruff, mypy, pytest, build Docker)
 └── .cursor/             regras e automações do assistente de IA
 ```
 
@@ -75,6 +78,7 @@ O repositório é um monorepo: o frontend (React) e o aplicativo (Android) entra
 | Autenticação JWT + CORS | Concluída |
 | Agente Q&A com citações | Concluída |
 | Dados estruturados (parâmetros e falhas) | Concluída |
-| Clientes (React / Android) e Docker/CI | Planejada |
+| Docker + CI (ruff, mypy, pytest) | Concluída |
+| Deploy e clientes (React / Android) | Planejada |
 
 Detalhes em [Roadmap](docs/08-roadmap.md).
