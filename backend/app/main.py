@@ -5,6 +5,7 @@ import httpx
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.routing import APIRoute
 
 from app.agente.router import router as agente_router
 from app.armazenamento.factory import criar_armazenamento
@@ -25,6 +26,11 @@ from app.ia.llm import criar_provedor_llm
 from app.parametros.router import router as parametros_router
 
 log = structlog.get_logger()
+
+
+def _id_operacao(rota: APIRoute) -> str:
+    """operationId = nome da função da rota (nomes limpos nos clientes gerados)."""
+    return rota.name
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -65,7 +71,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         await engine.dispose()
         log.info("app_encerrada")
 
-    app = FastAPI(title=settings.nome_app, version="0.1.0", lifespan=lifespan)
+    app = FastAPI(
+        title=settings.nome_app,
+        version="0.1.0",
+        lifespan=lifespan,
+        generate_unique_id_function=_id_operacao,
+    )
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins_lista,
