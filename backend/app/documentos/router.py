@@ -1,13 +1,14 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Query, Request, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Header, Query, Request, Response, UploadFile, status
 
 from app.auth.deps import exigir_operacao_escrita, exigir_usuario
 from app.core.config import Settings
 from app.core.deps import SettingsDep
 from app.core.errors import RegraNegocio
 from app.core.schemas import Pagina, PaginacaoDep
+from app.documentos.arquivo import content_disposition_inline
 from app.documentos.deps import DocumentoServiceDep
 from app.documentos.fila import agendar_ingestao
 from app.documentos.models import Idioma, TipoDocumento
@@ -51,6 +52,33 @@ async def listar_documentos(
 @router.get("/{id_documento}")
 async def obter_documento(id_documento: UUID, service: DocumentoServiceDep) -> DocumentoOut:
     return await service.obter(id_documento)
+
+
+def _hashes_if_none_match(valor: str | None) -> frozenset[str]:
+    if not valor:
+        return frozenset()
+    return frozenset(etag.strip().removeprefix("W/").strip('"') for etag in valor.split(","))
+
+
+@router.get(
+    "/{id_documento}/arquivo",
+    response_class=Response,
+    responses={
+        200: {"content": {"application/pdf": {}}, "description": "PDF do documento (exibição inline)"},
+        304: {"description": "O cliente já possui esta versão (ETag = SHA-256 do arquivo)"},
+    },
+)
+async def baixar_arquivo_documento(
+    id_documento: UUID,
+    service: DocumentoServiceDep,
+    if_none_match: Annotated[str | None, Header()] = None,
+) -> Response:
+    arquivo = await service.obter_arquivo(id_documento, _hashes_if_none_match(if_none_match))
+    cabecalhos = {"ETag": f'"{arquivo.hash_sha256}"', "Cache-Control": "private, max-age=0, must-revalidate"}
+    if arquivo.conteudo is None:
+        return Response(status_code=status.HTTP_304_NOT_MODIFIED, headers=cabecalhos)
+    cabecalhos["Content-Disposition"] = content_disposition_inline(arquivo.nome_arquivo)
+    return Response(content=arquivo.conteudo, media_type="application/pdf", headers=cabecalhos)
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, dependencies=_escrita)

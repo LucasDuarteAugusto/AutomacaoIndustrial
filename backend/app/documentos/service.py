@@ -13,7 +13,7 @@ from app.core.config import Settings
 from app.core.errors import Conflito, NaoEncontrado, RegraNegocio
 from app.core.schemas import Pagina
 from app.core.servicos import aplicar_alteracoes
-from app.documentos.arquivo import hash_sha256, validar_pdf
+from app.documentos.arquivo import hash_sha256, nome_arquivo_pdf, validar_pdf
 from app.documentos.models import Documento, Idioma, StatusProcessamento, TipoDocumento
 from app.documentos.repository import DocumentoRepository
 from app.documentos.schemas import DocumentoCreate, DocumentoOut, DocumentoUpdate
@@ -28,6 +28,14 @@ CAMPOS_VINCULO = {"ids_familias", "ids_equipamentos"}
 class ResultadoUpload:
     documento: DocumentoOut
     agendar_ingestao: bool
+
+
+@dataclass(frozen=True, slots=True)
+class ArquivoDocumento:
+    hash_sha256: str
+    nome_arquivo: str
+    conteudo: bytes | None
+    """None quando o cliente já tem esta versão (If-None-Match)."""
 
 
 def _sem_repetidos(ids: Sequence[UUID]) -> list[UUID]:
@@ -100,6 +108,21 @@ class DocumentoService:
 
     async def obter(self, id_documento: UUID) -> DocumentoOut:
         return DocumentoOut.model_validate(await self._obter(id_documento))
+
+    async def obter_arquivo(self, id_documento: UUID, hashes_do_cliente: frozenset[str]) -> ArquivoDocumento:
+        documento = await self._obter(id_documento)
+        if not documento.chave_arquivo or not documento.hash_sha256:
+            raise NaoEncontrado(f"Documento {id_documento} não possui arquivo.")
+        nome = nome_arquivo_pdf(
+            documento.codigo_documento or documento.titulo, reserva=f"documento-{documento.id_documento}"
+        )
+        if documento.hash_sha256 in hashes_do_cliente:
+            return ArquivoDocumento(documento.hash_sha256, nome, conteudo=None)
+        try:
+            conteudo = await self.armazenamento.carregar(documento.chave_arquivo)
+        except FileNotFoundError as erro:
+            raise NaoEncontrado(f"Arquivo do documento {id_documento} não encontrado no armazenamento.") from erro
+        return ArquivoDocumento(documento.hash_sha256, nome, conteudo)
 
     async def criar(self, dados: DocumentoCreate) -> DocumentoOut:
         familias = await self._carregar_familias(dados.ids_familias)

@@ -1,7 +1,7 @@
 import pytest
 
 from app.core.errors import RegraNegocio
-from app.documentos.arquivo import hash_sha256, validar_pdf
+from app.documentos.arquivo import content_disposition_inline, hash_sha256, nome_arquivo_pdf, validar_pdf
 
 
 def test_validar_pdf_ok() -> None:
@@ -21,6 +21,20 @@ def test_validar_pdf_assinatura() -> None:
 def test_validar_pdf_tamanho() -> None:
     with pytest.raises(RegraNegocio, match="limite"):
         validar_pdf(b"%PDF-" + b"x" * 20, tamanho_max=10)
+
+
+def test_nome_arquivo_pdf_remove_separadores_e_controles() -> None:
+    assert nome_arquivo_pdf('Manual\\G120/v4.7: "rampa"\n', reserva="x") == "Manual G120 v4.7 rampa.pdf"
+
+
+def test_nome_arquivo_pdf_usa_reserva_quando_vazio() -> None:
+    assert nome_arquivo_pdf(" / .. ", reserva="documento-1") == "documento-1.pdf"
+
+
+def test_content_disposition_inline_tem_nome_ascii_e_utf8() -> None:
+    assert content_disposition_inline("Lista de parâmetros.pdf") == (
+        "inline; filename=\"Lista-de-parametros.pdf\"; filename*=UTF-8''Lista%20de%20par%C3%A2metros.pdf"
+    )
 
 
 def test_hash_sha256_estavel() -> None:
