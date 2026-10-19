@@ -84,6 +84,83 @@ async def test_admin_pode_criar_usuario(client: AsyncClient) -> None:
     assert resp.json()["perfil"] == "LEITURA"
 
 
+async def test_status_bootstrap_reflete_base_vazia(client_sem_auth: AsyncClient) -> None:
+    antes = await client_sem_auth.get("/v1/auth/bootstrap")
+    assert antes.status_code == 200
+    assert antes.json() == {"necessario": True}
+
+    await client_sem_auth.post(
+        "/v1/auth/bootstrap",
+        json={"email": "admin@example.com", "senha": "senha-forte", "nome": "Admin"},
+    )
+    depois = await client_sem_auth.get("/v1/auth/bootstrap")
+    assert depois.json() == {"necessario": False}
+
+
+async def _token_bootstrap(client: AsyncClient, senha: str = "senha-forte") -> dict[str, str]:
+    resp = await client.post(
+        "/v1/auth/bootstrap",
+        json={"email": "dono@example.com", "senha": senha, "nome": "Dono"},
+    )
+    assert resp.status_code == 201, resp.text
+    return {"Authorization": f"Bearer {resp.json()['access_token']}"}
+
+
+async def test_trocar_propria_senha(client_sem_auth: AsyncClient) -> None:
+    headers = await _token_bootstrap(client_sem_auth)
+    resp = await client_sem_auth.post(
+        "/v1/auth/me/senha",
+        json={"senha_atual": "senha-forte", "senha_nova": "nova-senha-forte"},
+        headers=headers,
+    )
+    assert resp.status_code == 204
+
+    antiga = await client_sem_auth.post("/v1/auth/login", json={"email": "dono@example.com", "senha": "senha-forte"})
+    assert antiga.status_code == 401
+    nova = await client_sem_auth.post("/v1/auth/login", json={"email": "dono@example.com", "senha": "nova-senha-forte"})
+    assert nova.status_code == 200
+
+
+async def test_trocar_senha_com_senha_atual_errada_retorna_422(client_sem_auth: AsyncClient) -> None:
+    headers = await _token_bootstrap(client_sem_auth)
+    resp = await client_sem_auth.post(
+        "/v1/auth/me/senha",
+        json={"senha_atual": "errada", "senha_nova": "nova-senha-forte"},
+        headers=headers,
+    )
+    assert resp.status_code == 422
+    assert resp.json()["detail"] == "Senha atual incorreta."
+
+
+async def test_trocar_senha_igual_a_atual_retorna_422(client_sem_auth: AsyncClient) -> None:
+    headers = await _token_bootstrap(client_sem_auth)
+    resp = await client_sem_auth.post(
+        "/v1/auth/me/senha",
+        json={"senha_atual": "senha-forte", "senha_nova": "senha-forte"},
+        headers=headers,
+    )
+    assert resp.status_code == 422
+
+
+async def test_trocar_senha_nova_curta_retorna_422(client_sem_auth: AsyncClient) -> None:
+    headers = await _token_bootstrap(client_sem_auth)
+    resp = await client_sem_auth.post(
+        "/v1/auth/me/senha",
+        json={"senha_atual": "senha-forte", "senha_nova": "curta"},
+        headers=headers,
+    )
+    assert resp.status_code == 422
+    assert resp.json()["errors"][0]["loc"] == ["body", "senha_nova"]
+
+
+async def test_trocar_senha_sem_token_retorna_401(client_sem_auth: AsyncClient) -> None:
+    resp = await client_sem_auth.post(
+        "/v1/auth/me/senha",
+        json={"senha_atual": "senha-forte", "senha_nova": "nova-senha-forte"},
+    )
+    assert resp.status_code == 401
+
+
 async def _criar_usuario(client: AsyncClient, email: str, perfil: str = "OPERADOR", nome: str = "Usuário") -> str:
     resp = await client.post(
         "/v1/auth/usuarios",

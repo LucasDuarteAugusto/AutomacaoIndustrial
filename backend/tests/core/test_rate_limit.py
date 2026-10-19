@@ -24,6 +24,12 @@ def test_resolver_regra_exempta_health(settings: Settings) -> None:
     auth = resolver_regra("/v1/auth/login", settings)
     assert auth is not None
     assert auth.prefixo_chave == "auth"
+    troca_senha = resolver_regra("/v1/auth/me/senha", settings)
+    assert troca_senha is not None
+    assert troca_senha.prefixo_chave == "auth"
+    me = resolver_regra("/v1/auth/me", settings)
+    assert me is not None
+    assert me.prefixo_chave == "api"
 
 
 @pytest.fixture

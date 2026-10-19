@@ -5,7 +5,16 @@ from fastapi import APIRouter, Depends, Query, status
 
 from app.auth.deps import AuthServiceDep, UsuarioAtualDep, exigir_admin
 from app.auth.models import Perfil, Usuario
-from app.auth.schemas import BootstrapRequest, LoginRequest, TokenOut, UsuarioCreate, UsuarioOut, UsuarioUpdate
+from app.auth.schemas import (
+    BootstrapRequest,
+    BootstrapStatusOut,
+    LoginRequest,
+    TokenOut,
+    TrocaSenhaRequest,
+    UsuarioCreate,
+    UsuarioOut,
+    UsuarioUpdate,
+)
 from app.core.schemas import Pagina, PaginacaoDep
 
 router = APIRouter(prefix="/v1/auth", tags=["auth"])
@@ -24,9 +33,20 @@ async def bootstrap(dados: BootstrapRequest, service: AuthServiceDep) -> TokenOu
     return await service.bootstrap(dados)
 
 
+@router.get("/bootstrap")
+async def status_bootstrap(service: AuthServiceDep) -> BootstrapStatusOut:
+    """Indica se o bootstrap ainda é necessário (base sem usuários)."""
+    return await service.status_bootstrap()
+
+
 @router.get("/me", response_model=UsuarioOut)
 async def me(usuario: UsuarioAtualDep) -> Usuario:
     return usuario
+
+
+@router.post("/me/senha", status_code=status.HTTP_204_NO_CONTENT)
+async def trocar_senha(dados: TrocaSenhaRequest, usuario: UsuarioAtualDep, service: AuthServiceDep) -> None:
+    await service.trocar_senha(usuario, dados)
 
 
 @router.get("/usuarios", dependencies=[Depends(exigir_admin)])

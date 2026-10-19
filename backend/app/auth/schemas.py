@@ -19,6 +19,15 @@ class BootstrapRequest(Entrada):
     nome: str = Field(min_length=1, max_length=150)
 
 
+class BootstrapStatusOut(Saida):
+    necessario: bool = Field(description="True enquanto não houver nenhum usuário cadastrado")
+
+
+class TrocaSenhaRequest(Entrada):
+    senha_atual: str = Field(min_length=1, max_length=128)
+    senha_nova: str = Field(min_length=8, max_length=128)
+
+
 class UsuarioCreate(Entrada):
     email: EmailStr
     senha: str = Field(min_length=8, max_length=128)

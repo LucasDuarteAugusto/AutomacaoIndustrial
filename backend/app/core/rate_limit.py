@@ -96,7 +96,7 @@ def _cliente_ip(request: Request) -> str:
 def resolver_regra(path: str, settings: Settings) -> RegraLimite | None:
     if path in {"/health", "/ready", "/docs", "/redoc", "/openapi.json"}:
         return None
-    if path.startswith("/v1/auth/login") or path.startswith("/v1/auth/bootstrap"):
+    if path.startswith(("/v1/auth/login", "/v1/auth/bootstrap", "/v1/auth/me/senha")):
         return RegraLimite(
             settings.rate_limit_auth_por_minuto,
             60,

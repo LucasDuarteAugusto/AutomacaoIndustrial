@@ -4,10 +4,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import Perfil, Usuario
 from app.auth.repository import UsuarioRepository
-from app.auth.schemas import BootstrapRequest, LoginRequest, TokenOut, UsuarioCreate, UsuarioOut, UsuarioUpdate
+from app.auth.schemas import (
+    BootstrapRequest,
+    BootstrapStatusOut,
+    LoginRequest,
+    TokenOut,
+    TrocaSenhaRequest,
+    UsuarioCreate,
+    UsuarioOut,
+    UsuarioUpdate,
+)
 from app.auth.seguranca import criar_access_token, hash_senha, verificar_senha
 from app.core.config import Settings
-from app.core.errors import Conflito, NaoAutorizado, NaoEncontrado, Proibido
+from app.core.errors import Conflito, NaoAutorizado, NaoEncontrado, Proibido, RegraNegocio
 from app.core.schemas import Pagina
 from app.core.servicos import aplicar_alteracoes
 
@@ -39,6 +48,18 @@ class AuthService:
         await self.usuarios.adicionar(usuario)
         await self.session.commit()
         return self._token_out(usuario)
+
+    async def status_bootstrap(self) -> BootstrapStatusOut:
+        return BootstrapStatusOut(necessario=await self.usuarios.contar() == 0)
+
+    async def trocar_senha(self, usuario: Usuario, dados: TrocaSenhaRequest) -> None:
+        # 422 e não 401: senha atual errada não deve encerrar a sessão no cliente.
+        if not verificar_senha(dados.senha_atual, usuario.senha_hash):
+            raise RegraNegocio("Senha atual incorreta.")
+        if dados.senha_nova == dados.senha_atual:
+            raise RegraNegocio("A nova senha deve ser diferente da atual.")
+        usuario.senha_hash = hash_senha(dados.senha_nova)
+        await self.session.commit()
 
     async def criar_usuario(self, dados: UsuarioCreate, ator: Usuario) -> UsuarioOut:
         if ator.perfil != Perfil.ADMIN:
