@@ -92,6 +92,21 @@ Fluxo: validar PDF → SHA-256 → `chave_documento` → `armazenamento.salvar` 
 |---|---|---|
 | `ARMAZENAMENTO_TAMANHO_MAX_BYTES` | `52428800` (50 MiB) | Limite do corpo do upload |
 
+## Download HTTP
+
+`GET /v1/documentos/{id}/arquivo` devolve o PDF para exibição no navegador (qualquer perfil autenticado, inclusive `LEITURA`).
+
+| Header de resposta | Valor |
+|---|---|
+| `Content-Type` | `application/pdf` |
+| `Content-Disposition` | `inline; filename="<ascii>"; filename*=UTF-8''<nome>` (nome a partir do código do documento ou do título) |
+| `ETag` | `"<sha256 do arquivo>"` |
+| `Cache-Control` | `private, max-age=0, must-revalidate` |
+
+Com `If-None-Match` igual ao ETag, a resposta é **304** sem ler o armazenamento. Documento inexistente, sem arquivo ou com o objeto ausente no armazenamento: **404**.
+
+Limitações atuais: o arquivo é lido inteiro em memória (até o limite de upload) e não há suporte a `Range`. Com `ARMAZENAMENTO_TIPO=s3`, o PDF passa pela API; redirecionar para URL pré-assinada fica para depois.
+
 ## Próximo passo
 
 Busca híbrida: ver [11 — Ingestão](11-ingestao.md) (pipeline já implementado) e depois `POST /v1/busca`.

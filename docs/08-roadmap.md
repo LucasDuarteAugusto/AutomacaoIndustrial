@@ -46,4 +46,5 @@
 - [x] Réplicas + load balancer nginx (`feat/deploy`); ver [19 — Escala](19-escala.md).
 - [x] Redis para rate limit compartilhado (`feat/deploy`); ver [20 — Redis](20-redis.md).
 - [x] Estudo do frontend React: ver [21 — Estudo do frontend React](21-estudo-frontend-react.md).
+- [x] Pré-requisitos do frontend no backend (`feat/backend-pre-frontend`): listagem/detalhe de usuários e proteção do último ADMIN, status do bootstrap, troca da própria senha, download do PDF com ETag, filtro por status de processamento, rate limit por usuário, `operationId` limpo e exportação do OpenAPI sem banco.
 - [ ] Frontend React e aplicativo Android consumindo o OpenAPI.

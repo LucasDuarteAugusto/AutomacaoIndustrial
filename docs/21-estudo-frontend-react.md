@@ -174,11 +174,11 @@ Alternativa mais enxuta: `openapi-typescript` + `openapi-fetch` + `openapi-react
 
 ### Contrato versionado (`openapi.json`)
 
-1. Um script no backend exporta o OpenAPI **sem precisar do banco** (o engine só abre no `lifespan`; basta um `DATABASE_URL` fictício) para `frontend/openapi.json`.
+1. O backend exporta o OpenAPI **sem precisar do banco**: `uv run python -m app.core.openapi --saida ../frontend/openapi.json` (em `backend/`).
 2. O arquivo é commitado. `pnpm gerar:api` roda o Orval.
 3. Na CI, um job exporta o OpenAPI de novo e falha se diferir do commitado. Mudança de contrato aparece no diff do PR.
 
-Os `operationId` padrão do FastAPI são longos (`listar_documentos_v1_documentos_get`), o que gera hooks como `useListarDocumentosV1DocumentosGet`. Duas saídas: configurar `generate_unique_id_function` no `create_app` para usar o nome da função (`listar_documentos` → `useListarDocumentos`), ou montar o nome no `override.operationName` do Orval. A primeira é mais limpa e beneficia também o cliente Kotlin do Android. Verificado em 19/10/2026: as 43 operações da API têm nomes de função únicos, e `create_app().openapi()` roda sem banco no ar.
+Os `operationId` padrão do FastAPI seriam longos (`listar_documentos_v1_documentos_get`, gerando `useListarDocumentosV1DocumentosGet`). O `create_app` usa `generate_unique_id_function` com o nome da função da rota, então o Orval gera `useListarDocumentos`, `useObterDocumento` etc. Um teste garante que os nomes continuam únicos.
 
 ### Cliente HTTP e erros
 
@@ -271,7 +271,8 @@ A assinatura exata do mutator e o formato de retorno dos hooks com `httpClient: 
 | Documentos (lista, detalhe, upload, reprocessar) | `/v1/documentos`, `.../arquivo`, `.../reprocessar` | idem |
 | Parâmetros | `/v1/parametros` (CRUD) | idem |
 | Falhas e alarmes | `/v1/falhas` (CRUD) | idem |
-| Usuários | `POST/PATCH /v1/auth/usuarios` (falta listagem, ver seção 9) | ADMIN |
+| Usuários | `GET/POST/PATCH /v1/auth/usuarios`, `GET /v1/auth/usuarios/{id}` | ADMIN |
+| Minha conta (trocar senha) | `GET /v1/auth/me`, `POST /v1/auth/me/senha` | todos |
 | Indicador de status | `GET /ready` | todos |
 
 ### Assistente (tela principal)
@@ -281,7 +282,7 @@ A assinatura exata do mutator e o formato de retorno dos hooks com `httpClient: 
 - Cartões para `parametros` (código, nome, unidade, mínimo/máximo/padrão) e `falhas` (tipo FALHA/ALARME com cor, causa, solução, reação).
 - Rodapé discreto com `modelo_llm` e `trechos_consultados`; botão de copiar resposta.
 - Histórico só no navegador (IndexedDB ou `sessionStorage`) até o backend ter histórico por usuário.
-- Abrir o PDF na página citada depende de um endpoint de download (seção 9).
+- Abrir o PDF na página citada: `GET /v1/documentos/{id}/arquivo` (com `ETag`, então o navegador não baixa de novo o mesmo manual) + visualizador `react-pdf` na `pagina` da citação.
 
 ### Catálogo, documentos, parâmetros e falhas
 
@@ -402,17 +403,22 @@ O hook de pré-commit (`.pre-commit-config.yaml`) pode ganhar Prettier e ESLint 
 
 ## 9. Lacunas no backend (pré-requisitos)
 
-Itens a resolver em branches do backend antes ou durante o frontend:
+As lacunas de prioridade alta e média foram resolvidas na branch `feat/backend-pre-frontend`:
+
+| Prioridade | Lacuna | Situação |
+|---|---|---|
+| Alta | Listagem e detalhe de usuários | Resolvida: `GET /v1/auth/usuarios` (filtros `busca`, `perfil`, `ativo`) e `GET /v1/auth/usuarios/{id}`; o último ADMIN ativo não pode ser rebaixado nem desativado (409) |
+| Alta | Download do PDF | Resolvida: `GET /v1/documentos/{id}/arquivo` (`inline`, `ETag`/304). Sem `Range` e sem URL pré-assinada no S3 por enquanto |
+| Alta | Exportar o OpenAPI sem banco + `operationId` limpo | Resolvida: `python -m app.core.openapi`; operationId = nome da função |
+| Média | Saber se o bootstrap é necessário | Resolvida: `GET /v1/auth/bootstrap` → `{ "necessario": bool }` |
+| Média | Usuário trocar a própria senha | Resolvida: `POST /v1/auth/me/senha` (204; senha atual errada → 422, não 401) |
+| Média | Rate limit por usuário | Resolvida: chave pelo `sub` do JWT; sem token, por IP; rotas de autenticação sempre por IP (`RATE_LIMIT_POR_USUARIO`) |
+| Média | Filtro por status de processamento | Resolvida: `GET /v1/documentos?status_processamento=ERRO` |
+
+Continuam pendentes (prioridade baixa):
 
 | Prioridade | Lacuna | Por que o frontend precisa |
 |---|---|---|
-| Alta | `GET /v1/auth/usuarios` (listagem paginada) e `GET /v1/auth/usuarios/{id}` | Hoje só existe criar e alterar; a tela de usuários não tem o que listar |
-| Alta | `GET /v1/documentos/{id}/arquivo` (PDF com `Content-Disposition: inline`, autenticado; no S3 pode redirecionar para URL pré-assinada) | Abrir o PDF na página citada pelo agente e pela busca |
-| Alta | Script para exportar o OpenAPI sem banco + `operationId` limpo (`generate_unique_id_function`) | Geração do cliente e checagem de contrato na CI |
-| Média | Indicar se o bootstrap é necessário (por exemplo `GET /v1/auth/bootstrap` → `{ "necessario": true }`) | Mostrar a tela de primeiro acesso só quando fizer sentido |
-| Média | Usuário trocar a própria senha (`PATCH /v1/auth/me`) | Hoje só o ADMIN altera senha |
-| Média | Rate limit por usuário nas rotas autenticadas (chave = `sub` do token) | Em fábrica, vários usuários saem pelo mesmo IP (NAT) e dividiriam o limite de 120/min |
-| Média | Filtro `status_processamento` em `GET /v1/documentos` | Lista "documentos com erro" para reprocessar |
 | Baixa | Streaming da resposta do agente (SSE) | Mostrar o texto conforme é gerado |
 | Baixa | Histórico de conversas por usuário (já no roadmap) e feedback da resposta | Histórico entre dispositivos; medir qualidade do agente |
 | Baixa | Sessão em cookie `httpOnly` (+ refresh) | Tirar o token do alcance de JavaScript |
@@ -504,12 +510,12 @@ Cada fase em sua branch a partir de `development` (nunca direto nela):
 
 | Fase | Branch sugerida | Entrega |
 |---|---|---|
-| 0 — Fundação | `feat/frontend-fundacao` | Projeto Vite + TS + Tailwind + shadcn/ui, ESLint/Prettier, Vitest, TanStack Router/Query, Orval com `openapi.json`, `http.ts`, layout, login, guarda por perfil, job de CI, Dockerfile + nginx. No backend: script de exportação do OpenAPI e `operationId` limpo |
+| 0 — Fundação | `feat/frontend-fundacao` | Projeto Vite + TS + Tailwind + shadcn/ui, ESLint/Prettier, Vitest, TanStack Router/Query, Orval com `openapi.json`, `http.ts`, layout, login, guarda por perfil, primeiro acesso (bootstrap), job de CI, Dockerfile + nginx |
 | 1 — Catálogo | `feat/frontend-catalogo` | `TabelaDados` genérica, fabricantes, famílias, equipamentos, filtros na URL, exclusão com 409 → desativar |
 | 2 — Documentos | `feat/frontend-documentos` | CRUD, vínculo família/equipamento, upload com progresso, polling de status, reprocessar |
-| 3 — Busca e assistente | `feat/frontend-assistente` | Busca com filtros, assistente com citações e cartões de parâmetro/falha, histórico local. Com o endpoint de PDF: visualizador na página citada |
+| 3 — Busca e assistente | `feat/frontend-assistente` | Busca com filtros, assistente com citações e cartões de parâmetro/falha, histórico local, visualizador de PDF na página citada |
 | 4 — Parâmetros e falhas | `feat/frontend-parametros-falhas` | Tabelas virtualizadas, CRUD, paleta `Ctrl+K` por código |
-| 5 — Administração e produção | `feat/frontend-producao` | Usuários (com a listagem no backend), tema escuro, revisão de acessibilidade, E2E Playwright, Compose prod/escala e CD da imagem `web` |
+| 5 — Administração e produção | `feat/frontend-producao` | Usuários, minha conta (troca de senha), tema escuro, revisão de acessibilidade, E2E Playwright, Compose prod/escala e CD da imagem `web` |
 
 Documentação a acompanhar: `docs/22-frontend.md` (como rodar, estrutura, convenções) e regras do assistente em `.cursor/rules/` para o frontend (stack e versões, como já existe para o backend).
 

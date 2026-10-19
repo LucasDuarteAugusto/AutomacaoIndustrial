@@ -34,7 +34,7 @@ Toda listagem aceita `limit` (1–100, padrão 20) e `offset` (padrão 0) e resp
 
 ## Autenticação
 
-Rotas `/v1/...` exigem `Authorization: Bearer <token>`, exceto `POST /v1/auth/login` e `POST /v1/auth/bootstrap`. Detalhes e perfis: [13 — Auth](13-auth.md).
+Rotas `/v1/...` exigem `Authorization: Bearer <token>`, exceto `POST /v1/auth/login` e `GET`/`POST /v1/auth/bootstrap`. Detalhes e perfis: [13 — Auth](13-auth.md).
 
 No Swagger (`/docs`): faça bootstrap ou login → copie `access_token` → botão **Authorize** → informe o token. Sem isso, listagens e CRUDs retornam **401**.
 
@@ -53,10 +53,13 @@ Roteiro completo de teste: [00 — Guia de teste manual](00-guia-teste-manual.md
 
 | Rota | Descrição |
 |---|---|
+| `GET /bootstrap` | `{"necessario": bool}` — se o primeiro ADMIN ainda precisa ser criado |
 | `POST /bootstrap` | Primeiro ADMIN (só com base vazia) |
 | `POST /login` | E-mail + senha → JWT |
 | `GET /me` | Usuário do token |
-| `POST /usuarios`, `PATCH /usuarios/{id}` | CRUD de usuários (`ADMIN`) |
+| `POST /me/senha` | Troca a própria senha (`senha_atual`, `senha_nova`) → 204 |
+| `GET /usuarios`, `GET /usuarios/{id}` | Listagem paginada (filtros `busca`, `perfil`, `ativo`) e detalhe (`ADMIN`) |
+| `POST /usuarios`, `PATCH /usuarios/{id}` | Criação e alteração de usuários (`ADMIN`); o último ADMIN ativo não pode ser rebaixado nem desativado (409) |
 
 ### Agente — `/v1/agente`
 
@@ -115,6 +118,7 @@ Corpo de criação: `id_familia`, `codigo_pedido` (até 60), `nome` (até 200), 
 | `id_equipamento` | Documentos ligados ao modelo |
 | `tipo_documento` | `MANUAL_OPERACAO`, `LISTA_PARAMETROS`, `GUIA_RAPIDO`, `MANUAL_COMUNICACAO`, `DATASHEET`, `NOTA_APLICACAO` |
 | `idioma` | `pt-BR` ou `en` |
+| `status_processamento` | `PENDENTE`, `PROCESSANDO`, `INDEXADO` ou `ERRO` (ex.: listar documentos com erro para reprocessar) |
 | `busca` | Texto no título ou no código do documento |
 
 Corpo de criação: `titulo`, `tipo_documento`, `idioma`, `codigo_documento`, `edicao`, `versao_firmware`, `ids_familias` (pelo menos 1), `ids_equipamentos` (opcional; cada equipamento precisa pertencer a uma das famílias informadas).
@@ -135,6 +139,10 @@ Campos de arquivo (ingestão): `chave_arquivo`, `hash_sha256`, `tamanho_bytes`, 
 | Não é PDF / vazio / acima do limite | 422 |
 
 Limite: `ARMAZENAMENTO_TAMANHO_MAX_BYTES` (padrão 50 MiB). Após o upload, a ingestão roda em background (síncrona em `ambiente=teste`): preenche `paginas`, grava `TRECHOS` e passa a `INDEXADO` (ou `ERRO`). Trocar o PDF (hash diferente) apaga o arquivo antigo e os trechos. Excluir o documento também remove o arquivo do armazenamento.
+
+#### Download do PDF — `GET /v1/documentos/{id}/arquivo`
+
+Devolve o PDF com `Content-Type: application/pdf` e `Content-Disposition: inline` (abre no navegador). Envia `ETag` com o SHA-256 do arquivo; com `If-None-Match` igual, responde **304** sem corpo. **404** se o documento não existir, não tiver arquivo ou o objeto sumir do armazenamento. Qualquer perfil autenticado pode baixar. Detalhes em [10 — Armazenamento](10-armazenamento.md).
 
 #### Reprocessar — `POST /v1/documentos/{id}/reprocessar`
 
@@ -242,12 +250,20 @@ Erros de validação trazem a lista de campos em `errors`:
 
 ## Gerando cliente para o frontend
 
-Como o contrato é OpenAPI, React e Android podem gerar clientes tipados:
+Como o contrato é OpenAPI, React e Android podem gerar clientes tipados. Os `operationId` são o nome da função da rota (`listar_documentos`, `obter_documento`, `login`, …), o que gera nomes limpos nos clientes.
+
+O contrato pode ser exportado **sem banco e sem a API no ar**:
 
 ```powershell
-# TypeScript (React)
-npx openapi-typescript http://127.0.0.1:8000/openapi.json -o src/api/schema.d.ts
-
-# Kotlin (Android) com openapi-generator
-npx @openapitools/openapi-generator-cli generate -i http://127.0.0.1:8000/openapi.json -g kotlin -o android-client
+cd backend
+uv run python -m app.core.openapi --saida ../frontend/openapi.json   # sem --saida, escreve no stdout
 ```
+
+A saída é estável (UTF-8, indentação de 2 espaços, newline final), adequada para versionar e comparar na CI.
+
+```powershell
+# Kotlin (Android) com openapi-generator
+npx @openapitools/openapi-generator-cli generate -i frontend/openapi.json -g kotlin -o android-client
+```
+
+Para o React, o gerador recomendado está no [21 — Estudo do frontend React](21-estudo-frontend-react.md).
