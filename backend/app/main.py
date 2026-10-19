@@ -16,7 +16,7 @@ from app.core.config import Settings, get_settings
 from app.core.db import criar_engine, criar_sessionmaker
 from app.core.handlers import registrar_handlers
 from app.core.logging import configurar_logging
-from app.core.rate_limit import RateLimitMiddleware, criar_limitador
+from app.core.rate_limit import RateLimitMiddleware, chave_por_usuario_ou_ip, criar_limitador
 from app.documentos.router import router as documentos_router
 from app.falhas.router import router as falhas_router
 from app.health.router import router as health_router
@@ -88,6 +88,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         RateLimitMiddleware,
         settings=settings,
         limitador=limitador,
+        chave_cliente=chave_por_usuario_ou_ip(settings),
     )
     registrar_handlers(app)
     app.include_router(health_router)

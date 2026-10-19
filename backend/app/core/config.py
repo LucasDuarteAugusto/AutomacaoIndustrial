@@ -69,6 +69,7 @@ class Settings(BaseSettings):
 
     rate_limit_habilitado: bool = True
     rate_limit_backend: Literal["memoria", "redis"] = "memoria"
+    rate_limit_por_usuario: bool = True
     rate_limit_auth_por_minuto: int = Field(default=20, ge=1, le=10_000)
     rate_limit_busca_por_minuto: int = Field(default=60, ge=1, le=10_000)
     rate_limit_agente_por_minuto: int = Field(default=20, ge=1, le=10_000)

@@ -14,9 +14,12 @@ from starlette.requests import Request
 from starlette.responses import Response
 from starlette.types import ASGIApp
 
+from app.auth.seguranca import decodificar_access_token
 from app.core.config import Settings
-from app.core.errors import LimiteExcedido, RegraNegocio
+from app.core.errors import LimiteExcedido, NaoAutorizado, RegraNegocio
 from app.core.handlers import problema
+
+ROTAS_AUTH = ("/v1/auth/login", "/v1/auth/bootstrap", "/v1/auth/me/senha")
 
 
 class Limitador(Protocol):
@@ -93,10 +96,34 @@ def _cliente_ip(request: Request) -> str:
     return "desconhecido"
 
 
+def _sujeito_do_token(request: Request, settings: Settings) -> str | None:
+    esquema, _, token = request.headers.get("authorization", "").partition(" ")
+    if esquema.lower() != "bearer" or not token.strip():
+        return None
+    try:
+        return str(decodificar_access_token(token.strip(), settings)["sub"])
+    except NaoAutorizado:
+        return None
+
+
+def chave_por_usuario_ou_ip(settings: Settings) -> Callable[[Request], str]:
+    """Usuário autenticado conta pelo `sub` do JWT (vários usuários atrás do mesmo NAT); o resto, pelo IP."""
+
+    def _chave(request: Request) -> str:
+        # Login/bootstrap/troca de senha ficam por IP: é ali que se tenta força bruta.
+        if settings.rate_limit_por_usuario and not request.url.path.startswith(ROTAS_AUTH):
+            sujeito = _sujeito_do_token(request, settings)
+            if sujeito:
+                return f"u:{sujeito}"
+        return f"ip:{_cliente_ip(request)}"
+
+    return _chave
+
+
 def resolver_regra(path: str, settings: Settings) -> RegraLimite | None:
     if path in {"/health", "/ready", "/docs", "/redoc", "/openapi.json"}:
         return None
-    if path.startswith(("/v1/auth/login", "/v1/auth/bootstrap", "/v1/auth/me/senha")):
+    if path.startswith(ROTAS_AUTH):
         return RegraLimite(
             settings.rate_limit_auth_por_minuto,
             60,
