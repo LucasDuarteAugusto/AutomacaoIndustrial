@@ -4,7 +4,7 @@ from sqlalchemy import ColumnElement, or_, select
 
 from app.catalogo.models import Equipamento, Familia
 from app.core.repository import RepositorioBase
-from app.documentos.models import Documento, Idioma, TipoDocumento
+from app.documentos.models import Documento, Idioma, StatusProcessamento, TipoDocumento
 
 
 class DocumentoRepository(RepositorioBase[Documento]):
@@ -19,6 +19,7 @@ class DocumentoRepository(RepositorioBase[Documento]):
         id_equipamento: UUID | None,
         tipo_documento: TipoDocumento | None,
         idioma: Idioma | None,
+        status_processamento: StatusProcessamento | None,
         busca: str | None,
         limit: int,
         offset: int,
@@ -32,6 +33,8 @@ class DocumentoRepository(RepositorioBase[Documento]):
             filtros.append(Documento.tipo_documento == tipo_documento)
         if idioma:
             filtros.append(Documento.idioma == idioma)
+        if status_processamento:
+            filtros.append(Documento.status_processamento == status_processamento)
         if busca:
             filtros.append(
                 or_(

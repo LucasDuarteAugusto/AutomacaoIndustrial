@@ -2,6 +2,7 @@ from uuid import uuid4
 
 from httpx import AsyncClient
 
+from tests.documentos.test_upload import PDF_MINIMO
 from tests.factories import criar_documento, criar_equipamento, criar_familia
 
 
@@ -98,6 +99,30 @@ async def test_listar_documentos_filtra_por_equipamento(client: AsyncClient) -> 
     resp = await client.get("/v1/documentos", params={"id_equipamento": equipamento["id_equipamento"]})
 
     assert [d["id_documento"] for d in resp.json()["items"]] == [alvo["id_documento"]]
+
+
+async def test_listar_documentos_filtra_por_status_processamento(client: AsyncClient) -> None:
+    familia = await criar_familia(client)
+    pendente = await criar_documento(client, ids_familias=[familia["id_familia"]])
+    indexado = await criar_documento(client, ids_familias=[familia["id_familia"]])
+    upload = await client.post(
+        f"/v1/documentos/{indexado['id_documento']}/arquivo",
+        files={"arquivo": ("manual.pdf", PDF_MINIMO, "application/pdf")},
+    )
+    assert upload.json()["status_processamento"] == "INDEXADO"
+
+    params = {"id_familia": familia["id_familia"]}
+    resp_indexado = await client.get("/v1/documentos", params={**params, "status_processamento": "INDEXADO"})
+    resp_pendente = await client.get("/v1/documentos", params={**params, "status_processamento": "PENDENTE"})
+
+    assert [d["id_documento"] for d in resp_indexado.json()["items"]] == [indexado["id_documento"]]
+    assert [d["id_documento"] for d in resp_pendente.json()["items"]] == [pendente["id_documento"]]
+
+
+async def test_listar_documentos_com_status_invalido_retorna_422(client: AsyncClient) -> None:
+    resp = await client.get("/v1/documentos", params={"status_processamento": "CONCLUIDO"})
+    assert resp.status_code == 422
+    assert resp.json()["errors"][0]["loc"] == ["query", "status_processamento"]
 
 
 async def test_alterar_documento_substitui_familias_e_mantem_demais_campos(client: AsyncClient) -> None:

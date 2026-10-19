@@ -11,7 +11,7 @@ from app.core.schemas import Pagina, PaginacaoDep
 from app.documentos.arquivo import content_disposition_inline
 from app.documentos.deps import DocumentoServiceDep
 from app.documentos.fila import agendar_ingestao
-from app.documentos.models import Idioma, TipoDocumento
+from app.documentos.models import Idioma, StatusProcessamento, TipoDocumento
 from app.documentos.schemas import DocumentoCreate, DocumentoOut, DocumentoUpdate
 from app.documentos.service import DocumentoService
 
@@ -44,9 +44,19 @@ async def listar_documentos(
     id_equipamento: UUID | None = None,
     tipo_documento: TipoDocumento | None = None,
     idioma: Idioma | None = None,
+    status_processamento: StatusProcessamento | None = None,
     busca: Annotated[str | None, Query(max_length=100, description="Texto contido no título ou código")] = None,
 ) -> Pagina[DocumentoOut]:
-    return await service.listar(id_familia, id_equipamento, tipo_documento, idioma, busca, pagina.limit, pagina.offset)
+    return await service.listar(
+        id_familia,
+        id_equipamento,
+        tipo_documento,
+        idioma,
+        status_processamento,
+        busca,
+        pagina.limit,
+        pagina.offset,
+    )
 
 
 @router.get("/{id_documento}")

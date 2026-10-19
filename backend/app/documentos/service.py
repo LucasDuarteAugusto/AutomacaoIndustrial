@@ -97,12 +97,13 @@ class DocumentoService:
         id_equipamento: UUID | None,
         tipo_documento: TipoDocumento | None,
         idioma: Idioma | None,
+        status_processamento: StatusProcessamento | None,
         busca: str | None,
         limit: int,
         offset: int,
     ) -> Pagina[DocumentoOut]:
         itens, total = await self.documentos.listar(
-            id_familia, id_equipamento, tipo_documento, idioma, busca, limit, offset
+            id_familia, id_equipamento, tipo_documento, idioma, status_processamento, busca, limit, offset
         )
         return Pagina(items=[DocumentoOut.model_validate(i) for i in itens], total=total)
 
