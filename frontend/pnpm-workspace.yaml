@@ -1,0 +1,7 @@
+# Recusa versões publicadas há menos de 7 dias (minutos).
+minimumReleaseAge: 10080
+
+# Scripts de instalação de dependências só rodam com autorização explícita.
+allowBuilds:
+  esbuild: true
+  msw: false

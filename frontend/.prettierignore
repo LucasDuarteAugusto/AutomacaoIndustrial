@@ -1,0 +1,6 @@
+dist
+coverage
+pnpm-lock.yaml
+openapi.json
+src/api/gerado
+src/routeTree.gen.ts

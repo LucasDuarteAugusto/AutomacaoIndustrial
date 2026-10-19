@@ -17,3 +17,9 @@ htmlcov/
 
 # PDFs e binários do armazenamento local (backend)
 backend/data/
+
+# Frontend
+node_modules/
+frontend/dist/
+coverage/
+*.tsbuildinfo
