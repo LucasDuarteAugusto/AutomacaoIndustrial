@@ -1,23 +1,17 @@
-import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { z } from "zod";
 
 import "./index.css";
-import { routeTree } from "./routeTree.gen";
+import { App } from "./app/providers";
 
-const router = createRouter({ routeTree });
-
-declare module "@tanstack/react-router" {
-  interface Register {
-    router: typeof router;
-  }
-}
+z.config(z.locales.ptBR());
 
 const raiz = document.getElementById("root");
 if (!raiz) throw new Error("Elemento #root ausente no index.html");
 
 createRoot(raiz).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <App />
   </StrictMode>,
 );

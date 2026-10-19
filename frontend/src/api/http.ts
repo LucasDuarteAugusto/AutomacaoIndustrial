@@ -2,7 +2,6 @@ import { ProblemaApi, problemaDaResposta } from "./problema";
 import { aoNaoAutorizado, obterToken } from "./sessao-http";
 
 // Lido pelo Orval: tipo de erro dos hooks gerados.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type ErrorType<_Erro> = ProblemaApi;
 
 export async function http<T>(url: string, init: RequestInit = {}): Promise<T> {

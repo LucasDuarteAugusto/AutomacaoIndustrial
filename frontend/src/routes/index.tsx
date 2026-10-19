@@ -1,11 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-
-import { Button } from "@/components/ui/button";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
-  component: () => (
-    <main className="grid min-h-svh place-items-center">
-      <Button>Automação Industrial</Button>
-    </main>
-  ),
+  beforeLoad: () => {
+    throw redirect({ to: "/assistente" });
+  },
 });

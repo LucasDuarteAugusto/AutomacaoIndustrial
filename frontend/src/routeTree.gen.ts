@@ -10,33 +10,120 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PrimeiroAcessoRouteImport } from './routes/primeiro-acesso'
+import { Route as AppAssistenteRouteImport } from './routes/_app/assistente'
+import { Route as AppBuscaRouteImport } from './routes/_app/busca'
+import { Route as AppDocumentosIndexRouteImport } from './routes/_app/documentos/index'
+import { Route as AppDocumentosIdDocumentoRouteImport } from './routes/_app/documentos/$idDocumento'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrimeiroAcessoRoute = PrimeiroAcessoRouteImport.update({
+  id: '/primeiro-acesso',
+  path: '/primeiro-acesso',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppAssistenteRoute = AppAssistenteRouteImport.update({
+  id: '/assistente',
+  path: '/assistente',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBuscaRoute = AppBuscaRouteImport.update({
+  id: '/busca',
+  path: '/busca',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDocumentosIndexRoute = AppDocumentosIndexRouteImport.update({
+  id: '/documentos/',
+  path: '/documentos/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDocumentosIdDocumentoRoute =
+  AppDocumentosIdDocumentoRouteImport.update({
+    id: '/documentos/$idDocumento',
+    path: '/documentos/$idDocumento',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/primeiro-acesso': typeof PrimeiroAcessoRoute
+  '/assistente': typeof AppAssistenteRoute
+  '/busca': typeof AppBuscaRoute
+  '/documentos/$idDocumento': typeof AppDocumentosIdDocumentoRoute
+  '/documentos/': typeof AppDocumentosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/primeiro-acesso': typeof PrimeiroAcessoRoute
+  '/assistente': typeof AppAssistenteRoute
+  '/busca': typeof AppBuscaRoute
+  '/documentos/$idDocumento': typeof AppDocumentosIdDocumentoRoute
+  '/documentos': typeof AppDocumentosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/primeiro-acesso': typeof PrimeiroAcessoRoute
+  '/_app/assistente': typeof AppAssistenteRoute
+  '/_app/busca': typeof AppBuscaRoute
+  '/_app/documentos/$idDocumento': typeof AppDocumentosIdDocumentoRoute
+  '/_app/documentos/': typeof AppDocumentosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/primeiro-acesso'
+    | '/assistente'
+    | '/busca'
+    | '/documentos/$idDocumento'
+    | '/documentos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/primeiro-acesso'
+    | '/assistente'
+    | '/busca'
+    | '/documentos/$idDocumento'
+    | '/documentos'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/login'
+    | '/primeiro-acesso'
+    | '/_app/assistente'
+    | '/_app/busca'
+    | '/_app/documentos/$idDocumento'
+    | '/_app/documentos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  PrimeiroAcessoRoute: typeof PrimeiroAcessoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +135,79 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/primeiro-acesso': {
+      id: '/primeiro-acesso'
+      path: '/primeiro-acesso'
+      fullPath: '/primeiro-acesso'
+      preLoaderRoute: typeof PrimeiroAcessoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/assistente': {
+      id: '/_app/assistente'
+      path: '/assistente'
+      fullPath: '/assistente'
+      preLoaderRoute: typeof AppAssistenteRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/busca': {
+      id: '/_app/busca'
+      path: '/busca'
+      fullPath: '/busca'
+      preLoaderRoute: typeof AppBuscaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/documentos/': {
+      id: '/_app/documentos/'
+      path: '/documentos'
+      fullPath: '/documentos/'
+      preLoaderRoute: typeof AppDocumentosIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/documentos/$idDocumento': {
+      id: '/_app/documentos/$idDocumento'
+      path: '/documentos/$idDocumento'
+      fullPath: '/documentos/$idDocumento'
+      preLoaderRoute: typeof AppDocumentosIdDocumentoRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppAssistenteRoute: typeof AppAssistenteRoute
+  AppBuscaRoute: typeof AppBuscaRoute
+  AppDocumentosIdDocumentoRoute: typeof AppDocumentosIdDocumentoRoute
+  AppDocumentosIndexRoute: typeof AppDocumentosIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAssistenteRoute: AppAssistenteRoute,
+  AppBuscaRoute: AppBuscaRoute,
+  AppDocumentosIdDocumentoRoute: AppDocumentosIdDocumentoRoute,
+  AppDocumentosIndexRoute: AppDocumentosIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
+  PrimeiroAcessoRoute: PrimeiroAcessoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
