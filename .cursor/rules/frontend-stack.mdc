@@ -1,0 +1,57 @@
+---
+description: Stack, versões e convenções do frontend React (frontend/)
+globs: frontend/**
+alwaysApply: false
+---
+
+# Frontend — stack e convenções
+
+Fonte da verdade: `frontend/pnpm-lock.yaml` → `frontend/package.json` → esta regra. Detalhes em `docs/22-frontend.md`.
+
+## Gerenciamento
+
+- Só **pnpm 11** (Corepack, campo `packageManager`). Nunca `npm install`/`yarn` no `frontend/`.
+- Dependência nova: `pnpm add <pkg>@^<major>` dentro de `frontend/`. O `minimumReleaseAge` (7 dias) recusa versões recém-publicadas — use uma versão anterior do mesmo major, não desligue a proteção.
+- Script de instalação de dependência só roda se listado em `allowBuilds` (`pnpm-workspace.yaml`).
+- Não subir major "de passagem". Major novo precisa de ≥ ~6 meses e peers do ecossistema declarando suporte.
+
+## Alvo
+
+| Peça | Versão | Proibido / evitar |
+|---|---|---|
+| Node.js | 24 LTS | Node 26 até virar LTS e ser reavaliado |
+| TypeScript | 6.0 (strict, `noUncheckedIndexedAccess`) | TS 7 (typescript-eslint não suporta); `baseUrl`; `any` sem justificativa |
+| React | 19 | Componentes de classe; `defaultProps` |
+| Vite | 8 + `@vitejs/plugin-react` 6 | CRA, webpack |
+| Rotas | TanStack Router 1 (rotas por arquivo em `src/routes/`) | React Router; navegação com `window.location` |
+| Dados | TanStack Query 5 via hooks gerados pelo Orval | `fetch` solto em componente; `useEffect` para buscar dados; `ensureQueryData` (use `queryClient.query`) |
+| Formulários | React Hook Form 7 + Zod 4 (`@hookform/resolvers` 5) | Validação manual duplicando limites do backend |
+| UI | Tailwind 4 + shadcn/ui (Radix) + lucide-react | CSS-in-JS; bibliotecas de componentes paralelas |
+| Testes | Vitest 4 + Testing Library + MSW 2 | Mock do próprio hook/serviço; Jest |
+| Lint/format | ESLint 10 + typescript-eslint (type-checked) + Prettier 3 | ESLint 9 (sem suporte); Biome em paralelo |
+
+## Contrato com a API
+
+- `src/api/gerado/` e `openapi.json` são gerados (`pnpm contrato:atualizar`). Nunca editar à mão; commitar junto com a mudança do backend.
+- Chamadas HTTP só pelos hooks/funções gerados (mutator `src/api/http.ts`). Upload com progresso: `src/api/upload.ts`.
+- Erros são `ProblemaApi` (RFC 9457). Mensagem para o usuário: `mensagemDeErro`; 422 no formulário: `aplicarErrosNoFormulario`.
+- Campos em `snake_case` como no contrato; sem camada de conversão.
+- Busca (`POST /v1/busca`) é leitura: `useQuery` com a requisição na `queryKey`, não mutation.
+
+## Convenções
+
+- Vocabulário do domínio em português (`Documento`, `Familia`, `features/documentos`); termos de React em inglês.
+- Arquivos `kebab-case`; componentes `PascalCase`; alias `@/` para `src/`.
+- Filtros e paginação na URL com `validateSearch` (Zod, `.catch(undefined)` em cada campo).
+- Perfil: `usePodeEscrever()` esconde ações de escrita; o backend continua barrando (403).
+- Sem CDN em runtime (rede de fábrica): fontes via `@fontsource`, ícones no bundle.
+- Sem script inline no `index.html` (CSP `'self'` no nginx).
+- Textos de interface em pt-BR; datas e números com `Intl` (`src/lib/formato.ts`).
+
+```tsx
+// ❌ BAD
+useEffect(() => { fetch("/v1/documentos").then((r) => r.json()).then(setDocs); }, []);
+
+// ✅ GOOD
+const lista = useQuery(getListarDocumentosQueryOptions({ ...filtros, limit: 20 }));
+```

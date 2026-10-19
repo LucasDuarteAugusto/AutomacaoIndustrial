@@ -2,12 +2,15 @@
 
 Plataforma de apoio a profissionais de automação industrial no **comissionamento de acionamentos de motores**: relés de gerenciamento (SIMOCODE), soft starters e inversores de frequência.
 
-O backend organiza a documentação técnica dos fabricantes (fabricantes → famílias → modelos → documentos), indexa PDFs com **busca semântica (pgvector)** e expõe um **agente Q&A** com citação de fontes, autenticação JWT e dados estruturados de parâmetros/falhas.
+O backend organiza a documentação técnica dos fabricantes (fabricantes → famílias → modelos → documentos), indexa PDFs com **busca semântica (pgvector)** e expõe um **agente Q&A** com citação de fontes, autenticação JWT e dados estruturados de parâmetros/falhas. O frontend React oferece o assistente, a busca e a gestão de documentos.
 
 ![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.143-009688?logo=fastapi&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17%20%2B%20pgvector-4169E1?logo=postgresql&logoColor=white)
 ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.1%20async-D71F00)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-24%20LTS-5FA04E?logo=nodedotjs&logoColor=white)
 
 ## Início rápido
 
@@ -27,6 +30,15 @@ uv run uvicorn app.main:create_app --factory --reload
 ```
 
 Documentação interativa da API: <http://127.0.0.1:8000/docs>
+
+```powershell
+# Frontend (em frontend/) — Node 24 + pnpm 11; a API precisa estar no ar
+corepack enable pnpm
+pnpm install
+pnpm dev    # http://localhost:5173
+```
+
+Detalhes do frontend: [22 — Frontend](docs/22-frontend.md).
 
 **Testar em casa (roteiro completo):** [00 — Guia de teste manual](docs/00-guia-teste-manual.md).  
 Passo a passo e troubleshooting: [01 — Rodando localmente](docs/01-rodando-localmente.md).
@@ -57,6 +69,7 @@ Passo a passo e troubleshooting: [01 — Rodando localmente](docs/01-rodando-loc
 | [19 — Escala](docs/19-escala.md) | Réplicas da API + nginx (load balancer) |
 | [20 — Redis](docs/20-redis.md) | Rate limit compartilhado entre réplicas |
 | [21 — Estudo do frontend React](docs/21-estudo-frontend-react.md) | Stack e versões, arquitetura SPA, integração com a API, telas, lacunas do backend e plano de entrega |
+| [22 — Frontend](docs/22-frontend.md) | Como rodar, contrato OpenAPI → Orval, sessão, telas, testes e imagem de produção |
 
 ## Estrutura do repositório
 
@@ -67,14 +80,18 @@ AutomacaoIndustrial/
 │   ├── Dockerfile       imagem de produção/local via Compose
 │   ├── migrations/      versões do schema
 │   └── tests/           testes contra PostgreSQL real (testcontainers)
+├── frontend/            SPA React 19 + Vite 8 + TypeScript 6 (pnpm, Node 24)
+│   ├── src/             rotas, features, componentes, cliente gerado do OpenAPI
+│   ├── openapi.json     contrato exportado do backend (versionado)
+│   └── Dockerfile       nginx com o build + proxy de /v1 para a API
 ├── docs/                documentação
 ├── docker-compose.yml   PostgreSQL 17 + pgvector (+ serviço api)
-├── docker-compose.prod.yml  override para deploy estável
+├── docker-compose.prod.yml  override para deploy estável (+ serviço web)
 ├── .github/workflows/   CI + CD (GHCR)
 └── .cursor/             regras e automações do assistente de IA
 ```
 
-O repositório é um monorepo: o frontend (React) e o aplicativo (Android) entrarão como pastas irmãs de `backend/`, consumindo o contrato OpenAPI da API.
+O repositório é um monorepo: `frontend/` e, depois, o aplicativo Android ficam ao lado de `backend/`, consumindo o contrato OpenAPI da API.
 
 ## Status
 
@@ -89,6 +106,8 @@ O repositório é um monorepo: o frontend (React) e o aplicativo (Android) entra
 | Docker + CI (ruff, mypy, pytest) | Concluída |
 | Deploy estável (Compose prod + GHCR) | Concluída |
 | Rate limiting + escala + Redis | Concluída |
-| Clientes (React / Android) | Planejada |
+| Frontend: fundação, assistente, busca e documentos | Concluída |
+| Frontend: catálogo, parâmetros, falhas e usuários | Planejada |
+| Aplicativo Android | Planejada |
 
 Detalhes em [Roadmap](docs/08-roadmap.md).

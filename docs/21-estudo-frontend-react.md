@@ -17,7 +17,7 @@ Versões consultadas no registro npm e em `nodejs.org` em **19/10/2026**.
 | Cliente da API | Gerado do OpenAPI com **Orval 8** (hooks de query, schemas Zod e mocks MSW) |
 | Formulários | **React Hook Form 7** + **Zod 4** |
 | Testes | **Vitest 4.1** + Testing Library + **MSW 2**; E2E com **Playwright** |
-| Lint / formatação | **ESLint 9** (flat config) + typescript-eslint + **Prettier 3** |
+| Lint / formatação | **ESLint 10** (flat config) + typescript-eslint + **Prettier 3** (ver nota na tabela de versões) |
 | Deploy | Imagem `nginx:1.30-alpine` com o build; mesma origem da API (sem CORS em produção) |
 
 ## 1. O que o backend oferece ao frontend
@@ -77,7 +77,7 @@ Mesma filosofia do backend (pin de versão, sem subir major de passagem), em reg
 | Testes unitários | `vitest` **4.1** + `@testing-library/react` **16.3** | Vitest 5 | 5 saiu em set/2026 |
 | Mocks de API | `msw` **2.15** | MSW 3 | 3 saiu em set/2026 |
 | E2E | `@playwright/test` **1.64** | — | |
-| Lint | `eslint` **9.39** + `typescript-eslint` 8.71 + `eslint-plugin-react-hooks` 7.1 + `eslint-plugin-jsx-a11y` 6.10 + `@tanstack/eslint-plugin-query` 5 | ESLint 10 | `eslint-plugin-jsx-a11y` ainda não declara suporte ao ESLint 10 |
+| Lint | `eslint` **10** + `typescript-eslint` 8.71 + `eslint-plugin-react-hooks` 7.1 + `@tanstack/eslint-plugin-query` 5 | ESLint 9; `eslint-plugin-jsx-a11y` | **Revisado na implementação:** o ESLint 9 passou a ser marcado como sem suporte no npm, e o `jsx-a11y` (sem release desde out/2024) não declara suporte ao 10, por isso saiu. A acessibilidade fica com Radix e testes por papel (role) |
 | Formatação | `prettier` **3.9** | — | |
 | React Compiler | `babel-plugin-react-compiler` **1.0** (opcional) | — | Memoização automática; com plugin-react 6 entra via `@rolldown/plugin-babel`. Ligar na fundação se a prova de conceito não mostrar problema |
 | Servidor estático | `nginx:1.30-alpine` (stable) | 1.31 (mainline) | O `docker-compose.scale.yml` ainda usa `nginx:1.27-alpine`; atualizar junto |
@@ -316,7 +316,7 @@ export const Route = createFileRoute("/_app/falhas")({
 - **Tema escuro e alto contraste**: ambientes com pouca luz ou reflexo; tema claro/escuro com preferência salva.
 - **Códigos técnicos** (`p1120`, `F07801`, `6SL3210-1KE21-3UF1`) em fonte monoespaçada e com botão de copiar.
 - **Rede restrita de fábrica**: nada de CDN em tempo de execução. Fontes (`@fontsource-variable/inter`, JetBrains Mono) e ícones vão no build.
-- **Acessibilidade**: alvo WCAG 2.2 AA (Radix já entrega foco e teclado; `jsx-a11y` no lint).
+- **Acessibilidade**: alvo WCAG 2.2 AA (Radix já entrega foco e teclado; testes buscam elementos por papel e rótulo).
 - **Atalhos**: `Ctrl+K` abre uma paleta para ir direto a um parâmetro, falha ou equipamento pelo código.
 - **Formatação**: `Intl.NumberFormat("pt-BR")` para potência/corrente/tensão e `Intl.DateTimeFormat("pt-BR")` para datas.
 - Sem PWA/offline no início: o caso de uso em campo sem rede fica com o aplicativo Android.
@@ -368,7 +368,7 @@ Convenções:
 | Nível | Ferramenta | O que cobre |
 |---|---|---|
 | Tipos | `tsc --noEmit` | Contrato gerado × uso nas telas |
-| Lint | ESLint 9 (typescript-eslint com regras que usam tipos, react-hooks, jsx-a11y, plugin do TanStack Query) | Bugs comuns, hooks, acessibilidade |
+| Lint | ESLint 10 (typescript-eslint com regras que usam tipos, react-hooks, plugin do TanStack Query) | Bugs comuns, hooks |
 | Formatação | Prettier (`--check` na CI) | Estilo |
 | Unitário / componente | Vitest + Testing Library + MSW (handlers gerados pelo Orval) | Formulários, tratamento de erro, guarda de perfil, polling |
 | E2E | Playwright contra o Compose com `AMBIENTE=teste` | Login → cadastro de família → documento → upload → busca → pergunta |
