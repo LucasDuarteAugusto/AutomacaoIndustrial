@@ -45,4 +45,5 @@
 - [x] Rate limiting por IP (`feat/deploy`); ver [18 — Rate limit](18-rate-limit.md).
 - [x] Réplicas + load balancer nginx (`feat/deploy`); ver [19 — Escala](19-escala.md).
 - [x] Redis para rate limit compartilhado (`feat/deploy`); ver [20 — Redis](20-redis.md).
+- [x] Estudo do frontend React: ver [21 — Estudo do frontend React](21-estudo-frontend-react.md).
 - [ ] Frontend React e aplicativo Android consumindo o OpenAPI.

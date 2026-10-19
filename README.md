@@ -56,6 +56,7 @@ Passo a passo e troubleshooting: [01 — Rodando localmente](docs/01-rodando-loc
 | [18 — Rate limit](docs/18-rate-limit.md) | Limites por IP (memória; Redis depois) |
 | [19 — Escala](docs/19-escala.md) | Réplicas da API + nginx (load balancer) |
 | [20 — Redis](docs/20-redis.md) | Rate limit compartilhado entre réplicas |
+| [21 — Estudo do frontend React](docs/21-estudo-frontend-react.md) | Stack e versões, arquitetura SPA, integração com a API, telas, lacunas do backend e plano de entrega |
 
 ## Estrutura do repositório
 
