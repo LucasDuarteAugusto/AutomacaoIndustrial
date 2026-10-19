@@ -41,6 +41,9 @@ importers:
       lucide-react:
         specifier: ^1.55.0
         version: 1.55.0(@types/react@19.3.0)(react@19.3.0)
+      pdfjs-dist:
+        specifier: 5.4.296
+        version: 5.4.296
       radix-ui:
         specifier: ^1.8.0
         version: 1.8.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
