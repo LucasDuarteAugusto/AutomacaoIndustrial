@@ -20,7 +20,9 @@ export function LayoutAutenticacao({
         </div>
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">{titulo}</CardTitle>
+            <CardTitle className="text-xl">
+              <h1>{titulo}</h1>
+            </CardTitle>
             <CardDescription>{descricao}</CardDescription>
           </CardHeader>
           <CardContent>{children}</CardContent>

@@ -11,7 +11,7 @@ import { criarRouter } from "./router";
 
 export function App() {
   const [queryClient] = useState(criarQueryClient);
-  const [router] = useState(() => criarRouter(queryClient));
+  const [{ router }] = useState(() => criarRouter(queryClient));
   const [tema] = useTema();
 
   return (

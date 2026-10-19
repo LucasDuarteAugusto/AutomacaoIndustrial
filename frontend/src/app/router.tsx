@@ -1,5 +1,5 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { createRouter } from "@tanstack/react-router";
+import { createRouter, type RouterHistory } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import { configurarSessaoHttp } from "@/api/sessao-http";
@@ -10,14 +10,22 @@ export interface ContextoRouter {
   queryClient: QueryClient;
 }
 
-export function criarRouter(queryClient: QueryClient) {
-  const router = createRouter({
+function montarRouter(queryClient: QueryClient, history?: RouterHistory) {
+  return createRouter({
     routeTree,
     context: { queryClient },
     defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
     scrollRestoration: true,
+    ...(history ? { history } : {}),
   });
+}
+
+export type Router = ReturnType<typeof montarRouter>;
+
+/** Cria o router e liga a sessão ao cliente HTTP. `desmontar` remove o ouvinte de logout (usado nos testes). */
+export function criarRouter(queryClient: QueryClient, history?: RouterHistory) {
+  const router = montarRouter(queryClient, history);
 
   configurarSessaoHttp({
     obterToken: () => obterSessao()?.token ?? null,
@@ -26,7 +34,7 @@ export function criarRouter(queryClient: QueryClient) {
     },
   });
 
-  aoEncerrarSessao((motivo) => {
+  const desmontar = aoEncerrarSessao((motivo) => {
     queryClient.clear();
     if (motivo === "expirada") toast.warning("Sua sessão expirou. Entre novamente.");
     if (motivo === "nao-autorizado") toast.error("Sessão inválida. Entre novamente.");
@@ -35,11 +43,11 @@ export function criarRouter(queryClient: QueryClient) {
     void router.navigate({ to: "/login", search: { redirect } });
   });
 
-  return router;
+  return { router, desmontar };
 }
 
 declare module "@tanstack/react-router" {
   interface Register {
-    router: ReturnType<typeof criarRouter>;
+    router: Router;
   }
 }

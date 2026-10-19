@@ -62,7 +62,9 @@ export function encerrarSessao(motivo: MotivoEncerramento) {
 
 export function aoEncerrarSessao(ouvinte: (motivo: MotivoEncerramento) => void): () => void {
   ouvintesEncerramento.add(ouvinte);
-  return () => ouvintesEncerramento.delete(ouvinte);
+  return () => {
+    ouvintesEncerramento.delete(ouvinte);
+  };
 }
 
 function assinar(ouvinte: () => void) {

@@ -12,7 +12,7 @@ export async function http<T>(url: string, init: RequestInit = {}): Promise<T> {
 
   let resposta: Response;
   try {
-    resposta = await fetch(url, { ...init, headers });
+    resposta = await fetch(new URL(url, window.location.origin), { ...init, headers });
   } catch (erro) {
     if (erro instanceof DOMException && erro.name === "AbortError") throw erro;
     throw new ProblemaApi({

@@ -7,8 +7,17 @@ import { defineConfig } from "vitest/config";
 
 const API = "http://127.0.0.1:8000";
 
-export default defineConfig({
-  plugins: [tanstackRouter({ target: "react", autoCodeSplitting: true }), react(), tailwindcss()],
+export default defineConfig(({ mode }) => ({
+  plugins: [
+    tanstackRouter({
+      target: "react",
+      // Nos testes, chunks por rota só adicionam espera (e instabilidade) ao primeiro render.
+      autoCodeSplitting: mode !== "test",
+      routeFileIgnorePattern: "\\.test\\.",
+    }),
+    react(),
+    tailwindcss(),
+  ],
   resolve: {
     alias: { "@": path.resolve(import.meta.dirname, "src") },
   },
@@ -22,4 +31,4 @@ export default defineConfig({
     css: false,
     include: ["src/**/*.test.{ts,tsx}"],
   },
-});
+}));
