@@ -58,6 +58,74 @@ jobs:
       - name: Pytest (testcontainers + pgvector)
         run: uv run pytest -q --tb=short
 
+  mudancas:
+    name: Detectar mudanças
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filtro.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filtro
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+              - 'backend/app/**'
+              - 'backend/pyproject.toml'
+              - 'backend/uv.lock'
+              - '.github/workflows/ci.yml'
+
+  frontend:
+    name: Frontend (contrato, tipos, lint, testes, build)
+    runs-on: ubuntu-latest
+    needs: mudancas
+    if: needs.mudancas.outputs.frontend == 'true'
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.14"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Contrato OpenAPI em dia com o backend
+        run: |
+          pnpm contrato:atualizar
+          git diff --exit-code -- openapi.json src/api/gerado
+
+      - name: Tipos
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Formatação
+        run: pnpm format:check
+
+      - name: Testes
+        run: pnpm test --run
+
+      - name: Build
+        run: pnpm build
+
   docker:
     name: Build imagem API
     runs-on: ubuntu-latest

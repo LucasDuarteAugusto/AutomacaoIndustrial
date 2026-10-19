@@ -1,5 +1,8 @@
 default_install_hook_types: [pre-commit, pre-push]
 
+# Arquivos gerados (contrato, cliente Orval, árvore de rotas, lockfile) não são reescritos pelos hooks.
+exclude: ^frontend/(openapi\.json|pnpm-lock\.yaml|src/api/gerado/|src/routeTree\.gen\.ts)
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -43,5 +46,28 @@ repos:
         language: system
         types: [python]
         files: ^backend/
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: frontend-prettier
+        name: prettier (frontend)
+        entry: pnpm --dir frontend format:check
+        language: system
+        files: ^frontend/
+        pass_filenames: false
+
+      - id: frontend-typecheck
+        name: tsc (frontend)
+        entry: pnpm --dir frontend typecheck
+        language: system
+        files: ^frontend/
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: frontend-eslint
+        name: eslint (frontend)
+        entry: pnpm --dir frontend lint
+        language: system
+        files: ^frontend/
         pass_filenames: false
         stages: [pre-push]

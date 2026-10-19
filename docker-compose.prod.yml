@@ -45,3 +45,16 @@ services:
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
     ports:
       - "${API_PORT:-8000}:8000"
+
+  # Frontend (SPA) + proxy de /v1 para a API na mesma origem: o navegador não precisa de CORS.
+  web:
+    restart: unless-stopped
+    image: ${WEB_IMAGE:-automacao-industrial-web:prod}
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-8080}:80"

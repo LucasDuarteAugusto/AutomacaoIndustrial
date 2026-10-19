@@ -1,6 +1,6 @@
 name: CD
 
-# Publica a imagem da API no GitHub Container Registry (GHCR).
+# Publica as imagens da API e do frontend no GitHub Container Registry (GHCR).
 # Requer: Settings → Actions → General → Workflow permissions: Read and write.
 
 on:
@@ -15,15 +15,24 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/automacao-industrial-api
 
 jobs:
   publish:
-    name: Build e push GHCR
+    name: Build e push GHCR (${{ matrix.nome }})
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - nome: api
+            contexto: backend
+            imagem: automacao-industrial-api
+          - nome: web
+            contexto: frontend
+            imagem: automacao-industrial-web
     steps:
       - uses: actions/checkout@v4
 
@@ -38,7 +47,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.imagem }}
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -48,8 +57,8 @@ jobs:
       - name: Build e push
         uses: docker/build-push-action@v6
         with:
-          context: backend
-          file: backend/Dockerfile
+          context: ${{ matrix.contexto }}
+          file: ${{ matrix.contexto }}/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
