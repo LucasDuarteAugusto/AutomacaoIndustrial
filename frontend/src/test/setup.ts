@@ -22,6 +22,7 @@ globalThis.ResizeObserver = class {
 };
 Element.prototype.scrollIntoView = nada;
 Element.prototype.hasPointerCapture = () => false;
+Element.prototype.setPointerCapture = () => undefined;
 Element.prototype.releasePointerCapture = () => undefined;
 window.matchMedia = (query: string) =>
   ({

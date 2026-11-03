@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { IconeMarca } from "@/features/layout/icone-marca";
 
 export function LayoutAutenticacao({
   titulo,
@@ -15,8 +16,8 @@ export function LayoutAutenticacao({
     <main className="grid min-h-svh place-items-center bg-muted/40 p-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="flex items-center justify-center gap-2">
-          <img src="/favicon.svg" alt="" className="size-8" />
-          <span className="text-lg font-semibold">Automação Industrial</span>
+          <IconeMarca className="size-8" />
+          <span className="text-lg font-semibold">DrivePilot</span>
         </div>
         <Card>
           <CardHeader>

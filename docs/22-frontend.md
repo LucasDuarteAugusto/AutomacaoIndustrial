@@ -12,9 +12,15 @@ SPA em `frontend/` que consome a API pelo contrato OpenAPI. Decisões e alternat
 | `/busca` | Busca híbrida com consulta e filtros na URL, trechos realçados, PDF na página | todos |
 | `/documentos` | Lista paginada com filtros (título/código, tipo, status, idioma, família) e cadastro | leitura: todos; escrita: ADMIN/OPERADOR |
 | `/documentos/:id` | Metadados, upload do PDF com progresso, status da indexação (atualiza sozinho), reprocessar, excluir, visualizar PDF | idem |
+| `/fabricantes` | CRUD de fabricantes com busca, situação e exclusão com 409 → desativar | leitura: todos; escrita: ADMIN/OPERADOR |
+| `/familias` | CRUD de famílias com filtros por fabricante, tipo e situação | idem |
+| `/equipamentos` | CRUD de equipamentos com filtro por família e dados nominais | idem |
+| `/parametros` | CRUD de parâmetros por família, faixa de valores e documento de origem | idem |
+| `/falhas` | CRUD de falhas e alarmes por família, com causa, solução e reação | idem |
+| `/usuarios` | Usuários, perfis e situação (só ADMIN; o item de menu também só aparece para ele) | ADMIN |
 | menu do usuário | Minha conta (troca de senha), tema claro/escuro, sair | todos |
 
-Catálogo (CRUD de fabricantes, famílias e equipamentos), parâmetros, falhas e usuários ficam para a próxima entrega. As telas atuais só leem o catálogo, para os filtros.
+A paleta `Ctrl+K` por código e o E2E com Playwright ficam para a próxima entrega.
 
 ## Rodando localmente
 
@@ -114,6 +120,8 @@ Vitest + Testing Library + MSW. Os testes de rota renderizam o app inteiro (`ren
 | `src/routes/auth.test.tsx` | Guarda com destino, primeiro acesso, login ok/errado, validação |
 | `src/routes/_app/assistente.test.tsx` | Contexto da URL na requisição, resposta, cartões, painel da fonte, 429 |
 | `src/routes/_app/documentos/documentos.test.tsx` | Filtros da URL, ações ocultas para LEITURA, polling até INDEXADO |
+| `src/routes/_app/catalogo.test.tsx` | Filtros da URL, ações ocultas para LEITURA e exclusão 409 → desativar (fabricantes, famílias, equipamentos) |
+| `src/routes/_app/estruturados.test.tsx` | Parâmetros, falhas e usuários (acesso restrito a ADMIN) |
 
 E2E com Playwright fica para a próxima fase. Com `AMBIENTE=teste` a API usa embedding e LLM falsos, o que permite rodar o fluxo completo sem chaves.
 
@@ -141,3 +149,27 @@ O CD publica `ghcr.io/<org>/automacao-industrial-web` junto com a imagem da API.
 | `eslint-plugin-jsx-a11y` | incluído | **removido** | Sem atualização desde out/2024 e sem suporte declarado ao ESLint 10; acessibilidade coberta por Radix + testes por papel (role) |
 | `lucide-react` | 1.59 | 1.55 | O `minimumReleaseAge` (7 dias) recusou a 1.59 |
 | Orval | 8.43 | 8.41 | Idem |
+
+## Paleta de cores
+
+Adotada a **Alternativa 2**, implementada em `frontend/src/index.css` (tema claro e escuro).
+
+A aplicação deve seguir uma paleta moderna / Automação e Indústria 4.0. Ideal para softwares industriais modernos, dashboards, sistemas web de monitoramento e IoT (Internet das Coisas). Substitui o azul escuro tradicional por um azul-petróleo e usa o verde para passar a ideia de eficiência e sucesso.
+
+### Alternativa 1
+
+| Função na Interface	| Nome da Cor             |	Código HEX |
+| Dominante (65%)     |	Azul-Petróleo Fechado   |	#1C3D52  |
+| Secundária (25%)    |	Branco Gelo (Fundo)     |	#F4F6F8  |
+| Destaque/CTA (10%)  |	Verde Automação / Ativo |	#00DD00  |
+| Fundo/Textos	      | Azul Escuro Noturno     |	#0C0661  |
+
+### Alternativa 2
+
+| Elemento da Interface | Dominância(%) |	Nome da Cor |	Código HEX | Por que usar? |
+| Fundo Principal | 60 |	Branco Técnico / Cinza Claro |	#F8F9FA	| Reduz o cansaço visual. Manuais e códigos exigem leitura limpa. |
+| Estrutura & Menus | 30 | Azul Industrial Profundo |	#1A2B4C	| Transmite robustez, estabilidade e confiança no dado retornado. |
+| Ação/Sucesso | (CTA) |	Verde Diagnóstico |	#10B981 |	Usado para o botão de "Enviar Pergunta", status de "Driver Conectado" ou "Parâmetro Encontrado". |
+| Destaque/Atenção | - |	Laranja Alerta |	#F59E0B |	Perfeito para destacar códigos de falha (faults) e avisos de segurança do manual. |
+| Texto Principal | - |	Antracite Escuro |	#1E293B |	Nunca use preto puro (#000) em telas longas; o cinza muito escuro melhora a legibilidade. |
+

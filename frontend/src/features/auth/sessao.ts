@@ -84,6 +84,14 @@ export function usePodeEscrever(): boolean {
   return podeEscrever(useSessao()?.usuario.perfil);
 }
 
+export function ehAdmin(perfil: Perfil | undefined): boolean {
+  return perfil === "ADMIN";
+}
+
+export function useEhAdmin(): boolean {
+  return ehAdmin(useSessao()?.usuario.perfil);
+}
+
 /** Aceita só caminhos internos (evita open redirect via ?redirect=). */
 export function destinoSeguro(redirect: string | undefined): string {
   return redirect?.startsWith("/") && !redirect.startsWith("//") ? redirect : "/assistente";

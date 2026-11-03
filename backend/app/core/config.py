@@ -42,10 +42,18 @@ class Settings(BaseSettings):
     voyage_base_url: str = VOYAGE_BASE_URL_PADRAO
     embedding_modelo: str = EMBEDDING_MODELO_PADRAO
     embedding_dimensao: int = Field(default=EMBEDDING_DIMENSAO_PADRAO, ge=256, le=2000)
+    # Rate limit do Voyage (padrão do código: 429 → backoff exponencial)
+    voyage_max_tentativas: int = Field(default=5, ge=1, le=10)
+    voyage_espera_base_segundos: float = Field(default=10.0, ge=0, le=300)
+    # 0 = sem intervalo forçado. Tier grátis (3 RPM): 21 s. Ver docs/11-ingestao.md
+    voyage_intervalo_minimo_segundos: float = Field(default=0.0, ge=0, le=300)
 
     openai_api_key: SecretStr | None = None
     openai_base_url: str = OPENAI_BASE_URL_PADRAO
     llm_modelo: str = LLM_MODELO_PADRAO
+    # Provedores devolvem 429/5xx em picos de demanda; repete com backoff exponencial
+    llm_max_tentativas: int = Field(default=3, ge=1, le=6)
+    llm_espera_base_segundos: float = Field(default=2.0, ge=0, le=60)
 
     # local = pasta no disco; s3 = API S3-compatível (Cloudflare R2 ou AWS S3)
     armazenamento_tipo: Literal["local", "s3"] = "local"

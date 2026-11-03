@@ -1,16 +1,39 @@
 import { Link } from "@tanstack/react-router";
-import { FileText, MessageSquareText, Search } from "lucide-react";
+import {
+  Cpu,
+  Factory,
+  FileText,
+  Layers,
+  MessageSquareText,
+  Search,
+  SlidersHorizontal,
+  TriangleAlert,
+  Users,
+} from "lucide-react";
+
+import { useEhAdmin } from "@/features/auth/sessao";
+
+import { IconeMarca } from "./icone-marca";
 
 const ITENS = [
   { to: "/assistente", rotulo: "Assistente", icone: MessageSquareText },
   { to: "/busca", rotulo: "Busca", icone: Search },
   { to: "/documentos", rotulo: "Documentos", icone: FileText },
+  { to: "/fabricantes", rotulo: "Fabricantes", icone: Factory },
+  { to: "/familias", rotulo: "Famílias", icone: Layers },
+  { to: "/equipamentos", rotulo: "Equipamentos", icone: Cpu },
+  { to: "/parametros", rotulo: "Parâmetros", icone: SlidersHorizontal },
+  { to: "/falhas", rotulo: "Falhas", icone: TriangleAlert },
 ] as const;
 
+const ITENS_ADMIN = [{ to: "/usuarios", rotulo: "Usuários", icone: Users }] as const;
+
 export function Navegacao({ aoNavegar }: { aoNavegar?: () => void }) {
+  const ehAdmin = useEhAdmin();
+  const itens = ehAdmin ? [...ITENS, ...ITENS_ADMIN] : ITENS;
   return (
     <nav aria-label="Principal" className="grid gap-1 p-2">
-      {ITENS.map(({ to, rotulo, icone: Icone }) => (
+      {itens.map(({ to, rotulo, icone: Icone }) => (
         <Link
           key={to}
           to={to}
@@ -28,9 +51,12 @@ export function Navegacao({ aoNavegar }: { aoNavegar?: () => void }) {
 
 export function Marca() {
   return (
-    <Link to="/assistente" className="flex h-14 items-center gap-2 border-b px-4 font-semibold">
-      <img src="/favicon.svg" alt="" className="size-6" />
-      Automação Industrial
+    <Link
+      to="/assistente"
+      className="flex h-14 items-center gap-2 border-b border-sidebar-border px-4 font-semibold text-sidebar-foreground"
+    >
+      <IconeMarca />
+      DrivePilot
     </Link>
   );
 }

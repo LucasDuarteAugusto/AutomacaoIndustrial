@@ -1,6 +1,6 @@
 # 00 — Guia de teste manual (em casa)
 
-Roteiro para validar o backend de ponta a ponta no Windows, sem frontend. Tempo estimado: 30–60 min (mais se for configurar Voyage/OpenAI).
+Roteiro para validar o backend de ponta a ponta no Windows, sem frontend. Tempo estimado: 30–60 min (mais se for configurar Voyage/LLM).
 
 ## O que você precisa
 
@@ -9,7 +9,7 @@ Roteiro para validar o backend de ponta a ponta no Windows, sem frontend. Tempo 
 | Docker Desktop aberto | Sim |
 | [uv](https://docs.astral.sh/uv/) | Sim |
 | Conta [Voyage](https://www.voyageai.com/) (`VOYAGE_API_KEY`) | Só para ingestão/busca/agente **reais** |
-| Conta [OpenAI](https://platform.openai.com/) (`OPENAI_API_KEY`) | Só para o agente Q&A |
+| Conta de LLM compatível com OpenAI (`OPENAI_API_KEY`) — ex.: [OpenAI](https://platform.openai.com/) ou [Google AI Studio](https://aistudio.google.com/) | Só para o agente Q&A |
 | Um PDF técnico pequeno (manual, 5–20 páginas) | Recomendado |
 
 Sem chaves de IA você ainda valida: health, auth, catálogo, parâmetros/falhas e upload (o status do documento pode ficar `PENDENTE`/`ERRO` sem Voyage).
@@ -180,7 +180,7 @@ Espere `items` com `conteudo`, `pagina`, `score`. Sem trechos indexados, `items`
 
 Docs: [12 — Busca](12-busca.md).
 
-## 7. Agente Q&A (precisa OpenAI; Voyage se usar trechos)
+## 7. Agente Q&A (precisa de LLM configurado; Voyage se usar trechos)
 
 ```http
 POST /v1/agente/perguntar
@@ -196,7 +196,7 @@ Espere:
 - `resposta` em português
 - `parametros` com o hit de `p1120` (mesmo sem PDF)
 - `citacoes` se houver trechos da busca
-- `modelo_llm` (ex.: `gpt-5-mini`)
+- `modelo_llm` (o valor de `LLM_MODELO`, ex.: `gpt-5-mini`)
 
 Teste também: `"pergunta": "O que é F07801?"`.
 

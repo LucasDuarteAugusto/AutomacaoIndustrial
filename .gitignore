@@ -18,6 +18,9 @@ htmlcov/
 # PDFs e binários do armazenamento local (backend)
 backend/data/
 
+# Grafo de conhecimento gerado pelo graphify (regenerável)
+graphify-out/
+
 # Frontend
 node_modules/
 frontend/dist/

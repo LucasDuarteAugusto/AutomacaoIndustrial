@@ -15,6 +15,12 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as PrimeiroAcessoRouteImport } from './routes/primeiro-acesso'
 import { Route as AppAssistenteRouteImport } from './routes/_app/assistente'
 import { Route as AppBuscaRouteImport } from './routes/_app/busca'
+import { Route as AppEquipamentosRouteImport } from './routes/_app/equipamentos'
+import { Route as AppFabricantesRouteImport } from './routes/_app/fabricantes'
+import { Route as AppFalhasRouteImport } from './routes/_app/falhas'
+import { Route as AppFamiliasRouteImport } from './routes/_app/familias'
+import { Route as AppParametrosRouteImport } from './routes/_app/parametros'
+import { Route as AppUsuariosRouteImport } from './routes/_app/usuarios'
 import { Route as AppDocumentosIndexRouteImport } from './routes/_app/documentos/index'
 import { Route as AppDocumentosIdDocumentoRouteImport } from './routes/_app/documentos/$idDocumento'
 
@@ -47,6 +53,36 @@ const AppBuscaRoute = AppBuscaRouteImport.update({
   path: '/busca',
   getParentRoute: () => AppRoute,
 } as any)
+const AppEquipamentosRoute = AppEquipamentosRouteImport.update({
+  id: '/equipamentos',
+  path: '/equipamentos',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFabricantesRoute = AppFabricantesRouteImport.update({
+  id: '/fabricantes',
+  path: '/fabricantes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFalhasRoute = AppFalhasRouteImport.update({
+  id: '/falhas',
+  path: '/falhas',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFamiliasRoute = AppFamiliasRouteImport.update({
+  id: '/familias',
+  path: '/familias',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppParametrosRoute = AppParametrosRouteImport.update({
+  id: '/parametros',
+  path: '/parametros',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppUsuariosRoute = AppUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDocumentosIndexRoute = AppDocumentosIndexRouteImport.update({
   id: '/documentos/',
   path: '/documentos/',
@@ -65,6 +101,12 @@ export interface FileRoutesByFullPath {
   '/primeiro-acesso': typeof PrimeiroAcessoRoute
   '/assistente': typeof AppAssistenteRoute
   '/busca': typeof AppBuscaRoute
+  '/equipamentos': typeof AppEquipamentosRoute
+  '/fabricantes': typeof AppFabricantesRoute
+  '/falhas': typeof AppFalhasRoute
+  '/familias': typeof AppFamiliasRoute
+  '/parametros': typeof AppParametrosRoute
+  '/usuarios': typeof AppUsuariosRoute
   '/documentos/$idDocumento': typeof AppDocumentosIdDocumentoRoute
   '/documentos/': typeof AppDocumentosIndexRoute
 }
@@ -74,6 +116,12 @@ export interface FileRoutesByTo {
   '/primeiro-acesso': typeof PrimeiroAcessoRoute
   '/assistente': typeof AppAssistenteRoute
   '/busca': typeof AppBuscaRoute
+  '/equipamentos': typeof AppEquipamentosRoute
+  '/fabricantes': typeof AppFabricantesRoute
+  '/falhas': typeof AppFalhasRoute
+  '/familias': typeof AppFamiliasRoute
+  '/parametros': typeof AppParametrosRoute
+  '/usuarios': typeof AppUsuariosRoute
   '/documentos/$idDocumento': typeof AppDocumentosIdDocumentoRoute
   '/documentos': typeof AppDocumentosIndexRoute
 }
@@ -85,6 +133,12 @@ export interface FileRoutesById {
   '/primeiro-acesso': typeof PrimeiroAcessoRoute
   '/_app/assistente': typeof AppAssistenteRoute
   '/_app/busca': typeof AppBuscaRoute
+  '/_app/equipamentos': typeof AppEquipamentosRoute
+  '/_app/fabricantes': typeof AppFabricantesRoute
+  '/_app/falhas': typeof AppFalhasRoute
+  '/_app/familias': typeof AppFamiliasRoute
+  '/_app/parametros': typeof AppParametrosRoute
+  '/_app/usuarios': typeof AppUsuariosRoute
   '/_app/documentos/$idDocumento': typeof AppDocumentosIdDocumentoRoute
   '/_app/documentos/': typeof AppDocumentosIndexRoute
 }
@@ -96,6 +150,12 @@ export interface FileRouteTypes {
     | '/primeiro-acesso'
     | '/assistente'
     | '/busca'
+    | '/equipamentos'
+    | '/fabricantes'
+    | '/falhas'
+    | '/familias'
+    | '/parametros'
+    | '/usuarios'
     | '/documentos/$idDocumento'
     | '/documentos/'
   fileRoutesByTo: FileRoutesByTo
@@ -105,6 +165,12 @@ export interface FileRouteTypes {
     | '/primeiro-acesso'
     | '/assistente'
     | '/busca'
+    | '/equipamentos'
+    | '/fabricantes'
+    | '/falhas'
+    | '/familias'
+    | '/parametros'
+    | '/usuarios'
     | '/documentos/$idDocumento'
     | '/documentos'
   id:
@@ -115,6 +181,12 @@ export interface FileRouteTypes {
     | '/primeiro-acesso'
     | '/_app/assistente'
     | '/_app/busca'
+    | '/_app/equipamentos'
+    | '/_app/fabricantes'
+    | '/_app/falhas'
+    | '/_app/familias'
+    | '/_app/parametros'
+    | '/_app/usuarios'
     | '/_app/documentos/$idDocumento'
     | '/_app/documentos/'
   fileRoutesById: FileRoutesById
@@ -170,6 +242,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBuscaRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/equipamentos': {
+      id: '/_app/equipamentos'
+      path: '/equipamentos'
+      fullPath: '/equipamentos'
+      preLoaderRoute: typeof AppEquipamentosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/fabricantes': {
+      id: '/_app/fabricantes'
+      path: '/fabricantes'
+      fullPath: '/fabricantes'
+      preLoaderRoute: typeof AppFabricantesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/falhas': {
+      id: '/_app/falhas'
+      path: '/falhas'
+      fullPath: '/falhas'
+      preLoaderRoute: typeof AppFalhasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/familias': {
+      id: '/_app/familias'
+      path: '/familias'
+      fullPath: '/familias'
+      preLoaderRoute: typeof AppFamiliasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/parametros': {
+      id: '/_app/parametros'
+      path: '/parametros'
+      fullPath: '/parametros'
+      preLoaderRoute: typeof AppParametrosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/usuarios': {
+      id: '/_app/usuarios'
+      path: '/usuarios'
+      fullPath: '/usuarios'
+      preLoaderRoute: typeof AppUsuariosRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/documentos/': {
       id: '/_app/documentos/'
       path: '/documentos'
@@ -190,6 +304,12 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppAssistenteRoute: typeof AppAssistenteRoute
   AppBuscaRoute: typeof AppBuscaRoute
+  AppEquipamentosRoute: typeof AppEquipamentosRoute
+  AppFabricantesRoute: typeof AppFabricantesRoute
+  AppFalhasRoute: typeof AppFalhasRoute
+  AppFamiliasRoute: typeof AppFamiliasRoute
+  AppParametrosRoute: typeof AppParametrosRoute
+  AppUsuariosRoute: typeof AppUsuariosRoute
   AppDocumentosIdDocumentoRoute: typeof AppDocumentosIdDocumentoRoute
   AppDocumentosIndexRoute: typeof AppDocumentosIndexRoute
 }
@@ -197,6 +317,12 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAssistenteRoute: AppAssistenteRoute,
   AppBuscaRoute: AppBuscaRoute,
+  AppEquipamentosRoute: AppEquipamentosRoute,
+  AppFabricantesRoute: AppFabricantesRoute,
+  AppFalhasRoute: AppFalhasRoute,
+  AppFamiliasRoute: AppFamiliasRoute,
+  AppParametrosRoute: AppParametrosRoute,
+  AppUsuariosRoute: AppUsuariosRoute,
   AppDocumentosIdDocumentoRoute: AppDocumentosIdDocumentoRoute,
   AppDocumentosIndexRoute: AppDocumentosIndexRoute,
 }

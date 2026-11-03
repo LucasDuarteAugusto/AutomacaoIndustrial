@@ -102,9 +102,9 @@ O modelo completo está em `backend/.env.example` (copie para `.env` e preencha 
 | `VOYAGE_BASE_URL` | Opcional | `https://api.voyageai.com/v1` | |
 | `EMBEDDING_MODELO` | Opcional | `voyage-context-4` | |
 | `EMBEDDING_DIMENSAO` | Opcional | `1024` | Deve bater com `TRECHOS.EMBEDDING` |
-| `OPENAI_API_KEY` | No agente | *(vazio)* | LLM `gpt-5-mini` |
-| `OPENAI_BASE_URL` | Opcional | `https://api.openai.com/v1` | |
-| `LLM_MODELO` | Opcional | `gpt-5-mini` | |
+| `OPENAI_API_KEY` | No agente | *(vazio)* | Chave do provedor de LLM |
+| `OPENAI_BASE_URL` | Opcional | `https://api.openai.com/v1` | URL base compatível com Chat Completions |
+| `LLM_MODELO` | Opcional | `gpt-5-mini` | Nome do modelo no provedor escolhido |
 | `JWT_SECRET` | Sim (trocar fora do PC local) | valor de exemplo | Assinatura do token — ver [13](13-auth.md) |
 | `JWT_EXPIRACAO_MINUTOS` | Opcional | `480` | Validade do access token |
 | `CORS_ORIGINS` | Se for usar frontend | `http://localhost:5173,...` | Origens permitidas |
@@ -113,6 +113,8 @@ O modelo completo está em `backend/.env.example` (copie para `.env` e preencha 
 | `REDIS_URL` | Se backend=redis | — | Ex.: `redis://localhost:6379/0` |
 
 Opcionais de pool (padrão no código): `DB_POOL_SIZE` (5), `DB_MAX_OVERFLOW` (10), `DB_ECHO` (`false`). Lista completa comentada: `backend/.env.example`.
+
+O bloco do LLM aceita qualquer provedor compatível com o OpenAI Chat Completions — as variáveis mantêm o prefixo `OPENAI_` por herança, não por exigência. Para usar Google AI, por exemplo, troque as três: `OPENAI_API_KEY` (chave do AI Studio), `OPENAI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai` e `LLM_MODELO=gemini-3.8-flash`. O padrão `gpt-5-mini` / `api.openai.com/v1` vem de `app/core/ia_defaults.py` (aplicado por `app/core/config.py`), não do Dockerfile. Detalhes e outros provedores: [14 — Agente](14-agente.md).
 
 ## Comandos do dia a dia
 

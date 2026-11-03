@@ -1,0 +1,19 @@
+[project]
+name = "automacaoindustrial"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "LucasDuarteAugusto", email = "lucastestetdp@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "alembic>=1.20.1",
+]
+
+[project.scripts]
+automacaoindustrial = "automacaoindustrial:main"
+
+[build-system]
+requires = ["uv_build>=0.13.4,<0.14.0"]
+build-backend = "uv_build"

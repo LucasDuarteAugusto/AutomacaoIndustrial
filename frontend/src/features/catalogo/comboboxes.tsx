@@ -9,8 +9,16 @@ import {
   getListarFabricantesQueryOptions,
   getObterFabricanteQueryOptions,
 } from "@/api/gerado/fabricantes/fabricantes";
+import {
+  getListarDocumentosQueryOptions,
+  getObterDocumentoQueryOptions,
+} from "@/api/gerado/documentos/documentos";
 import { getListarFamiliasQueryOptions, getObterFamiliaQueryOptions } from "@/api/gerado/familias/familias";
 import type { EquipamentoOut, PaginaEquipamentoOut, PaginaFamiliaOut } from "@/api/gerado/modelos";
+import {
+  getListarTiposQueryOptions,
+  getObterTipoQueryOptions,
+} from "@/api/gerado/tipos-equipamento/tipos-equipamento";
 import { ComboboxAssincrono, type Opcao } from "@/components/combobox-assincrono";
 import { SelecaoMultipla } from "@/components/selecao-multipla";
 
@@ -46,6 +54,52 @@ export function ComboboxFabricante({ id, valor, aoMudar, desabilitado }: PropsCo
       mapear={(pagina) => pagina.items.map((f) => ({ id: f.id_fabricante, rotulo: f.nome }))}
       rotuloSelecionado={selecionado.data?.nome}
       placeholder="Todos os fabricantes"
+      desabilitado={desabilitado}
+    />
+  );
+}
+
+export function ComboboxTipoEquipamento({ id, valor, aoMudar, desabilitado }: PropsCombobox) {
+  const selecionado = useQuery({ ...getObterTipoQueryOptions(valor ?? ""), enabled: !!valor });
+  return (
+    <ComboboxAssincrono
+      id={id}
+      valor={valor}
+      aoMudar={(opcao) => {
+        aoMudar(opcao?.id);
+      }}
+      consulta={() => getListarTiposQueryOptions({ limit: LIMITE_OPCOES })}
+      mapear={(pagina) =>
+        pagina.items.map((t) => ({ id: t.id_tipo_equipamento, rotulo: t.nome, detalhe: t.codigo }))
+      }
+      rotuloSelecionado={selecionado.data?.nome}
+      placeholder="Todos os tipos"
+      desabilitado={desabilitado}
+    />
+  );
+}
+
+export function ComboboxDocumento({ id, valor, aoMudar, desabilitado }: PropsCombobox) {
+  const selecionado = useQuery({ ...getObterDocumentoQueryOptions(valor ?? ""), enabled: !!valor });
+  return (
+    <ComboboxAssincrono
+      id={id}
+      valor={valor}
+      aoMudar={(opcao) => {
+        aoMudar(opcao?.id);
+      }}
+      consulta={(busca) =>
+        getListarDocumentosQueryOptions({ busca: busca || undefined, limit: LIMITE_OPCOES })
+      }
+      mapear={(pagina) =>
+        pagina.items.map((d) => ({
+          id: d.id_documento,
+          rotulo: d.titulo,
+          detalhe: d.codigo_documento ?? undefined,
+        }))
+      }
+      rotuloSelecionado={selecionado.data?.titulo}
+      placeholder="Sem documento"
       desabilitado={desabilitado}
     />
   );
